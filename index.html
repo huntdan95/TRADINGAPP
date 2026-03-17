@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PaperTrader — Learn to Trade</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- React -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 
-  <!-- Firebase 10 (compat) -->
+  <!-- Firebase 10 (compat for simplicity) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -24,231 +24,118 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0c10;
-      --bg2: #0f1117;
-      --surface: #141720;
-      --surface2: #1c2030;
-      --surface3: #242940;
-      --border: #1e2235;
-      --border-hover: #2e3450;
-      --text: #e8eaf0;
-      --text-dim: #6b7194;
-      --text-muted: #4a5070;
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #242836;
+      --border: #2e3348;
+      --text: #e4e6f0;
+      --text-dim: #8b8fa3;
       --accent: #6c5ce7;
-      --accent2: #a29bfe;
-      --accent-glow: rgba(108,92,231,.25);
       --accent-hover: #7e71ea;
-      --green: #00cec9;
-      --green2: #55efc4;
-      --green-bg: rgba(0,206,201,.1);
-      --red: #ff6b6b;
-      --red2: #ff8787;
-      --red-bg: rgba(255,107,107,.1);
-      --yellow: #feca57;
-      --yellow-bg: rgba(254,202,87,.1);
+      --green: #00b894;
+      --green-bg: rgba(0,184,148,.12);
+      --red: #e74c3c;
+      --red-bg: rgba(231,76,60,.12);
+      --yellow: #fdcb6e;
+      --yellow-bg: rgba(253,203,110,.12);
       --blue: #74b9ff;
-      --blue-bg: rgba(116,185,255,.1);
-      --gradient-accent: linear-gradient(135deg, #6c5ce7, #a29bfe);
-      --gradient-green: linear-gradient(135deg, #00cec9, #55efc4);
-      --gradient-red: linear-gradient(135deg, #ff6b6b, #ff8787);
-      --shadow-sm: 0 2px 8px rgba(0,0,0,.2);
-      --shadow-md: 0 4px 24px rgba(0,0,0,.3);
-      --shadow-lg: 0 8px 40px rgba(0,0,0,.4);
-      --shadow-glow: 0 0 30px var(--accent-glow);
-      --radius: 14px;
-      --radius-sm: 10px;
-      --radius-lg: 20px;
-      --transition: .25s cubic-bezier(.4,0,.2,1);
     }
 
-    html { scroll-behavior: smooth; }
-
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
     #root { min-height: 100vh; }
 
     /* Scrollbar */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    /* ═══ AUTH PAGE ═══ */
+    /* Auth Page */
     .auth-page {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--bg);
-      position: relative;
-      overflow: hidden;
+      background: linear-gradient(135deg, #0f1117 0%, #1a1d27 50%, #0f1117 100%);
     }
-    .auth-page::before {
-      content: '';
-      position: absolute;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(108,92,231,.15) 0%, transparent 70%);
-      top: -200px;
-      right: -100px;
-      animation: float 8s ease-in-out infinite;
-    }
-    .auth-page::after {
-      content: '';
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,206,201,.1) 0%, transparent 70%);
-      bottom: -150px;
-      left: -100px;
-      animation: float 10s ease-in-out infinite reverse;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-30px) scale(1.05); }
-    }
-
     .auth-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 44px;
-      width: 420px;
-      max-width: 92vw;
-      position: relative;
-      z-index: 1;
-      backdrop-filter: blur(20px);
-      box-shadow: var(--shadow-lg), 0 0 60px rgba(108,92,231,.08);
-      animation: cardEnter .6s cubic-bezier(.16,1,.3,1);
+      border-radius: 16px;
+      padding: 40px;
+      width: 400px;
+      max-width: 90vw;
     }
-    @keyframes cardEnter {
-      from { opacity: 0; transform: translateY(24px) scale(.97); }
-    }
-    .auth-card .logo-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .auth-card .logo-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: var(--gradient-accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      box-shadow: 0 4px 16px rgba(108,92,231,.3);
-    }
-    .auth-card h1 { font-size: 26px; font-weight: 800; letter-spacing: -.5px; }
-    .auth-card .subtitle {
-      color: var(--text-dim);
-      margin-bottom: 32px;
-      font-size: 14px;
-      line-height: 1.5;
-    }
+    .auth-card h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .auth-card .subtitle { color: var(--text-dim); margin-bottom: 32px; font-size: 14px; }
+    .auth-card .logo { font-size: 36px; margin-bottom: 16px; display: block; }
 
-    .input-group { margin-bottom: 18px; }
-    .input-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-dim);
-      margin-bottom: 7px;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
     .input-group input {
       width: 100%;
-      padding: 12px 16px;
+      padding: 10px 14px;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: 8px;
       color: var(--text);
       font-size: 14px;
-      font-family: inherit;
       outline: none;
-      transition: all var(--transition);
+      transition: border-color .2s;
     }
-    .input-group input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
-    .input-group input::placeholder { color: var(--text-muted); }
+    .input-group input:focus { border-color: var(--accent); }
 
-    /* ═══ BUTTONS ═══ */
     .btn {
-      padding: 11px 22px;
-      border-radius: var(--radius-sm);
+      padding: 10px 20px;
+      border-radius: 8px;
       border: none;
       font-size: 14px;
       font-weight: 600;
-      font-family: inherit;
       cursor: pointer;
-      transition: all var(--transition);
+      transition: all .2s;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 8px;
-      position: relative;
-      overflow: hidden;
     }
-    .btn:active { transform: scale(.97); }
-    .btn-primary {
-      background: var(--gradient-accent);
-      color: #fff;
-      width: 100%;
-      box-shadow: 0 4px 16px rgba(108,92,231,.25);
-    }
-    .btn-primary:hover { box-shadow: 0 6px 24px rgba(108,92,231,.35); transform: translateY(-1px); }
+    .btn-primary { background: var(--accent); color: #fff; width: 100%; justify-content: center; }
+    .btn-primary:hover { background: var(--accent-hover); }
     .btn-google {
       background: #fff;
       color: #333;
       width: 100%;
+      justify-content: center;
       margin-bottom: 16px;
-      font-weight: 600;
-      box-shadow: var(--shadow-sm);
     }
-    .btn-google:hover { background: #f8f8f8; box-shadow: var(--shadow-md); transform: translateY(-1px); }
-    .btn-sm { padding: 7px 16px; font-size: 13px; border-radius: 8px; }
-    .btn-success { background: var(--gradient-green); color: #000; font-weight: 700; }
-    .btn-success:hover { box-shadow: 0 4px 16px rgba(0,206,201,.3); }
-    .btn-danger { background: var(--gradient-red); color: #fff; }
-    .btn-danger:hover { box-shadow: 0 4px 16px rgba(255,107,107,.3); }
+    .btn-google:hover { background: #f0f0f0; }
+    .btn-sm { padding: 6px 14px; font-size: 13px; }
+    .btn-success { background: var(--green); color: #fff; }
+    .btn-success:hover { opacity: .9; }
+    .btn-danger { background: var(--red); color: #fff; }
+    .btn-danger:hover { opacity: .9; }
     .btn-outline {
       background: transparent;
       border: 1px solid var(--border);
-      color: var(--text-dim);
+      color: var(--text);
     }
-    .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,92,231,.05); }
-    .btn-ghost { background: transparent; color: var(--text-dim); padding: 6px; }
-    .btn-ghost:hover { color: var(--text); background: var(--surface2); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
 
     .divider {
       text-align: center;
-      margin: 24px 0;
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      margin: 20px 0;
+      color: var(--text-dim);
+      font-size: 13px;
       position: relative;
     }
     .divider::before, .divider::after {
       content: '';
       position: absolute;
       top: 50%;
-      width: 38%;
+      width: 40%;
       height: 1px;
       background: var(--border);
     }
@@ -257,624 +144,322 @@
 
     .auth-toggle {
       text-align: center;
-      margin-top: 24px;
+      margin-top: 20px;
       font-size: 13px;
       color: var(--text-dim);
     }
     .auth-toggle a {
-      color: var(--accent2);
+      color: var(--accent);
       cursor: pointer;
       text-decoration: none;
-      font-weight: 600;
     }
     .auth-toggle a:hover { text-decoration: underline; }
 
     .error-msg {
       background: var(--red-bg);
       color: var(--red);
-      padding: 12px 16px;
-      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      border-radius: 8px;
       font-size: 13px;
-      margin-bottom: 18px;
-      border: 1px solid rgba(255,107,107,.15);
-      animation: shake .4s;
-    }
-    @keyframes shake {
-      10%,90% { transform: translateX(-1px); }
-      20%,80% { transform: translateX(2px); }
-      30%,50%,70% { transform: translateX(-3px); }
-      40%,60% { transform: translateX(3px); }
+      margin-bottom: 16px;
     }
 
-    /* ═══ APP LAYOUT ═══ */
+    /* Layout */
     .app-layout { display: flex; min-height: 100vh; }
-
     .sidebar {
-      width: 260px;
+      width: 240px;
       background: var(--surface);
       border-right: 1px solid var(--border);
-      padding: 0;
+      padding: 20px 0;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 50;
-      transition: transform var(--transition);
     }
-
     .sidebar-brand {
-      padding: 24px 24px 20px;
+      padding: 0 20px 20px;
       border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
     }
-    .sidebar-brand .brand-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .sidebar-brand .brand-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: var(--gradient-accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 2px 12px rgba(108,92,231,.3);
-    }
-    .sidebar-brand h2 { font-size: 17px; font-weight: 800; letter-spacing: -.3px; }
-    .sidebar-brand .tagline {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 8px;
-      padding-left: 50px;
-    }
+    .sidebar-brand h2 { font-size: 18px; font-weight: 700; }
+    .sidebar-brand span { font-size: 12px; color: var(--text-dim); }
 
-    .sidebar-nav { flex: 1; padding: 12px 0; }
-    .nav-section-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 16px 24px 8px;
-    }
+    .sidebar-nav { flex: 1; }
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 11px 24px;
-      margin: 2px 12px;
+      gap: 10px;
+      padding: 10px 20px;
       color: var(--text-dim);
       cursor: pointer;
       font-size: 14px;
-      font-weight: 500;
-      transition: all var(--transition);
-      border-radius: var(--radius-sm);
-      position: relative;
+      transition: all .2s;
+      border-left: 3px solid transparent;
     }
     .nav-item:hover { color: var(--text); background: var(--surface2); }
     .nav-item.active {
-      color: #fff;
-      background: var(--gradient-accent);
-      box-shadow: 0 2px 12px rgba(108,92,231,.3);
+      color: var(--accent);
+      background: rgba(108,92,231,.08);
+      border-left-color: var(--accent);
     }
-    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-item svg { width: 18px; height: 18px; }
 
     .sidebar-footer {
       padding: 16px 20px;
       border-top: 1px solid var(--border);
     }
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      padding: 8px;
-      border-radius: var(--radius-sm);
-      transition: background var(--transition);
-    }
-    .user-info:hover { background: var(--surface2); }
+    .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
     .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--gradient-accent);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 14px;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0;
+      font-weight: 600;
     }
-    .user-name { font-size: 13px; font-weight: 600; }
-    .user-email { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .user-name { font-size: 13px; font-weight: 500; }
+    .user-email { font-size: 11px; color: var(--text-dim); }
 
     .main-content {
       flex: 1;
-      margin-left: 260px;
-      padding: 28px 32px;
+      padding: 24px;
       overflow-y: auto;
-      min-height: 100vh;
-      background: var(--bg);
+      max-height: 100vh;
     }
 
-    /* Mobile */
-    .mobile-header {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 56px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      z-index: 40;
-      padding: 0 16px;
-      align-items: center;
-      gap: 12px;
-    }
-    .hamburger {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      color: var(--text);
-    }
-    .hamburger:hover { background: var(--surface2); }
-    .hamburger svg { width: 20px; height: 20px; }
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.6);
-      z-index: 45;
-      backdrop-filter: blur(4px);
-    }
-
-    @media (max-width: 860px) {
-      .mobile-header { display: flex; }
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.open { transform: translateX(0); }
-      .sidebar-overlay.open { display: block; }
-      .main-content { margin-left: 0; padding: 72px 16px 24px; }
-      .content-grid { grid-template-columns: 1fr !important; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .page-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
-      .page-header .search-wrapper { width: 100%; }
-    }
-    @media (max-width: 500px) {
-      .stats-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ═══ PAGE TRANSITIONS ═══ */
-    .page-enter {
-      animation: pageIn .35s cubic-bezier(.16,1,.3,1);
-    }
-    @keyframes pageIn {
-      from { opacity: 0; transform: translateY(12px); }
-    }
-
-    /* ═══ DASHBOARD ═══ */
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-    .page-header h2 {
-      font-size: 24px;
-      font-weight: 800;
-      letter-spacing: -.5px;
-    }
-    .page-header .search-wrapper { width: 380px; }
-
+    /* Dashboard */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 22px;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
+      border-radius: 12px;
+      padding: 20px;
     }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      opacity: 0;
-      transition: opacity var(--transition);
-    }
-    .stat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-    .stat-card:hover::before { opacity: 1; }
-    .stat-card:nth-child(1)::before { background: var(--gradient-accent); }
-    .stat-card:nth-child(2)::before { background: var(--gradient-green); }
-    .stat-card:nth-child(3)::before { background: linear-gradient(135deg, #74b9ff, #a29bfe); }
-    .stat-card:nth-child(4)::before { background: linear-gradient(135deg, #feca57, #ff6b6b); }
-    .stat-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: .8px;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-    .stat-value { font-size: 26px; font-weight: 800; letter-spacing: -.5px; }
-    .stat-change {
-      font-size: 13px;
-      margin-top: 6px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 6px;
-    }
-    .stat-change.up { color: var(--green); background: var(--green-bg); }
-    .stat-change.down { color: var(--red); background: var(--red-bg); }
+    .stat-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+    .stat-value { font-size: 24px; font-weight: 700; }
+    .stat-change { font-size: 13px; margin-top: 4px; }
+    .stat-change.up { color: var(--green); }
+    .stat-change.down { color: var(--red); }
 
     .content-grid {
       display: grid;
-      grid-template-columns: 1fr 380px;
+      grid-template-columns: 1fr 360px;
       gap: 20px;
     }
-    @media (max-width: 1200px) and (min-width: 861px) {
-      .content-grid { grid-template-columns: 1fr 340px; }
+    @media (max-width: 1100px) {
+      .content-grid { grid-template-columns: 1fr; }
     }
 
-    /* ═══ CARDS ═══ */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 12px;
       overflow: hidden;
-      transition: border-color var(--transition);
     }
-    .card:hover { border-color: var(--border-hover); }
     .card-header {
-      padding: 18px 22px;
+      padding: 16px 20px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .card-header h3 { font-size: 14px; font-weight: 700; letter-spacing: -.2px; }
-    .card-body { padding: 22px; }
+    .card-header h3 { font-size: 15px; font-weight: 600; }
+    .card-body { padding: 20px; }
 
-    /* ═══ CHART ═══ */
-    .chart-toolbar {
+    /* Chart */
+    .chart-controls {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
     }
-    .chart-controls { display: flex; gap: 4px; }
     .chart-btn {
-      padding: 5px 14px;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      background: var(--surface2);
-      color: var(--text-dim);
-      font-size: 12px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-    .chart-btn:hover { color: var(--text); background: var(--surface3); }
-    .chart-btn.active {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(108,92,231,.3);
-    }
-    .chart-btn-indicator {
-      padding: 5px 10px;
-      border-radius: 8px;
+      padding: 4px 12px;
+      border-radius: 6px;
       border: 1px solid var(--border);
       background: transparent;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 600;
-      font-family: inherit;
+      color: var(--text-dim);
+      font-size: 12px;
       cursor: pointer;
-      transition: all var(--transition);
-      text-transform: uppercase;
-      letter-spacing: .3px;
     }
-    .chart-btn-indicator:hover { color: var(--accent2); border-color: var(--accent); background: rgba(108,92,231,.06); }
+    .chart-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    #chart-container { width: 100%; height: 350px; border-radius: 8px; overflow: hidden; }
 
-    #chart-container { width: 100%; height: 380px; border-radius: 10px; overflow: hidden; }
-
-    /* ═══ SEARCH ═══ */
-    .search-box { position: relative; }
+    /* Search */
+    .search-box {
+      position: relative;
+      margin-bottom: 16px;
+    }
     .search-box input {
       width: 100%;
-      padding: 11px 16px 11px 42px;
-      background: var(--surface2);
+      padding: 10px 14px 10px 38px;
+      background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: 8px;
       color: var(--text);
       font-size: 14px;
-      font-family: inherit;
       outline: none;
-      transition: all var(--transition);
     }
-    .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); background: var(--surface); }
-    .search-box input::placeholder { color: var(--text-muted); }
-    .search-box .search-icon {
+    .search-box input:focus { border-color: var(--accent); }
+    .search-box svg {
       position: absolute;
-      left: 14px;
+      left: 12px;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--text-muted);
+      color: var(--text-dim);
       width: 16px;
       height: 16px;
-      transition: color var(--transition);
     }
-    .search-box input:focus ~ .search-icon,
-    .search-box:focus-within .search-icon { color: var(--accent); }
     .search-results {
       position: absolute;
-      top: calc(100% + 6px);
+      top: 100%;
       left: 0;
       right: 0;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      max-height: 260px;
+      border-radius: 8px;
+      max-height: 240px;
       overflow-y: auto;
       z-index: 100;
-      box-shadow: var(--shadow-lg);
-      animation: dropdownIn .2s;
+      margin-top: 4px;
     }
-    @keyframes dropdownIn { from { opacity: 0; transform: translateY(-6px); } }
     .search-result-item {
-      padding: 12px 16px;
+      padding: 10px 14px;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
-      align-items: center;
       font-size: 14px;
-      transition: background var(--transition);
     }
     .search-result-item:hover { background: var(--surface2); }
-    .search-result-item:first-child { border-radius: 9px 9px 0 0; }
-    .search-result-item:last-child { border-radius: 0 0 9px 9px; }
-    .search-result-item .symbol { font-weight: 700; font-size: 14px; }
-    .search-result-item .name { color: var(--text-dim); font-size: 12px; margin-top: 2px; }
-    .search-result-item .result-arrow { color: var(--text-muted); font-size: 16px; }
+    .search-result-item .symbol { font-weight: 600; }
+    .search-result-item .name { color: var(--text-dim); font-size: 12px; }
 
-    /* ═══ TRADE PANEL ═══ */
-    .trade-tabs { display: flex; }
+    /* Trade Panel */
+    .trade-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
     .trade-tab {
       flex: 1;
-      padding: 14px;
+      padding: 12px;
       text-align: center;
       font-size: 14px;
-      font-weight: 700;
-      font-family: inherit;
+      font-weight: 600;
       cursor: pointer;
       background: none;
       border: none;
-      color: var(--text-muted);
-      transition: all var(--transition);
-      position: relative;
+      color: var(--text-dim);
+      border-bottom: 2px solid transparent;
     }
-    .trade-tab::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 20%;
-      right: 20%;
-      height: 3px;
-      border-radius: 3px 3px 0 0;
-      background: transparent;
-      transition: all var(--transition);
-    }
-    .trade-tab.active-buy { color: var(--green); }
-    .trade-tab.active-buy::after { background: var(--green); left: 10%; right: 10%; }
-    .trade-tab.active-sell { color: var(--red); }
-    .trade-tab.active-sell::after { background: var(--red); left: 10%; right: 10%; }
-    .trade-tab:hover { color: var(--text); }
+    .trade-tab.active-buy { color: var(--green); border-bottom-color: var(--green); }
+    .trade-tab.active-sell { color: var(--red); border-bottom-color: var(--red); }
 
-    .trade-form { padding: 22px; }
+    .trade-form { padding: 20px; }
     .trade-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       font-size: 14px;
     }
-    .trade-row label { color: var(--text-dim); font-weight: 500; }
+    .trade-row label { color: var(--text-dim); }
     .trade-input {
-      width: 130px;
-      padding: 10px 14px;
+      width: 120px;
+      padding: 8px 12px;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 6px;
       color: var(--text);
-      font-size: 15px;
-      font-weight: 600;
-      font-family: inherit;
+      font-size: 14px;
       text-align: right;
       outline: none;
-      transition: all var(--transition);
     }
-    .trade-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .trade-input:focus { border-color: var(--accent); }
     .trade-summary {
       background: var(--bg);
-      border-radius: var(--radius-sm);
-      padding: 16px;
-      margin: 18px 0;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 16px 0;
       font-size: 13px;
-      border: 1px solid var(--border);
     }
     .trade-summary-row {
       display: flex;
       justify-content: space-between;
-      padding: 5px 0;
-      color: var(--text-dim);
+      margin-bottom: 6px;
     }
-    .trade-summary-row:last-child { color: var(--text); font-weight: 700; border-top: 1px solid var(--border); margin-top: 6px; padding-top: 10px; }
-    .trade-max {
-      text-align: right;
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .trade-max span {
-      color: var(--accent2);
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .trade-max span:hover { text-decoration: underline; }
+    .trade-summary-row:last-child { margin-bottom: 0; font-weight: 600; }
 
-    .btn-buy {
-      background: var(--gradient-green);
-      color: #000;
-      font-weight: 700;
-      width: 100%;
-      box-shadow: 0 4px 16px rgba(0,206,201,.2);
-    }
-    .btn-buy:hover { box-shadow: 0 6px 24px rgba(0,206,201,.3); transform: translateY(-1px); }
-    .btn-sell {
-      background: var(--gradient-red);
-      color: #fff;
-      font-weight: 700;
-      width: 100%;
-      box-shadow: 0 4px 16px rgba(255,107,107,.2);
-    }
-    .btn-sell:hover { box-shadow: 0 6px 24px rgba(255,107,107,.3); transform: translateY(-1px); }
+    .btn-buy { background: var(--green); color: #fff; width: 100%; justify-content: center; }
+    .btn-buy:hover { filter: brightness(1.1); }
+    .btn-sell { background: var(--red); color: #fff; width: 100%; justify-content: center; }
+    .btn-sell:hover { filter: brightness(1.1); }
 
-    /* ═══ PORTFOLIO TABLE ═══ */
-    .positions-table { width: 100%; border-collapse: collapse; }
+    /* Portfolio */
+    .positions-table { width: 100%; }
     .positions-table th {
-      font-size: 10px;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: .8px;
-      color: var(--text-muted);
-      font-weight: 700;
+      letter-spacing: .5px;
+      color: var(--text-dim);
       text-align: left;
-      padding: 12px 14px;
+      padding: 10px 12px;
       border-bottom: 1px solid var(--border);
     }
     .positions-table td {
-      padding: 14px;
+      padding: 12px;
       font-size: 14px;
       border-bottom: 1px solid var(--border);
-      transition: background var(--transition);
     }
-    .positions-table tr:hover td { background: var(--surface2); }
     .positions-table tr:last-child td { border-bottom: none; }
-    .positions-table .ticker {
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .ticker-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: var(--surface2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--accent2);
-    }
+    .positions-table .ticker { font-weight: 600; }
 
     .pnl-positive { color: var(--green); }
     .pnl-negative { color: var(--red); }
-    .pnl-badge {
-      display: inline-flex;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-    .pnl-badge.positive { background: var(--green-bg); color: var(--green); }
-    .pnl-badge.negative { background: var(--red-bg); color: var(--red); }
 
-    /* ═══ WATCHLIST ═══ */
+    /* Watchlist */
     .watchlist-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 4px;
+      padding: 12px 0;
       border-bottom: 1px solid var(--border);
       cursor: pointer;
-      transition: all var(--transition);
-      border-radius: 8px;
-      margin: 0 -4px;
     }
     .watchlist-item:last-child { border-bottom: none; }
-    .watchlist-item:hover { background: var(--surface2); padding: 14px 10px; margin: 0 -10px; }
-    .watchlist-left { display: flex; align-items: center; gap: 12px; }
-    .watchlist-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--surface2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--accent2);
-    }
-    .watchlist-ticker { font-weight: 700; font-size: 14px; }
-    .watchlist-name { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .watchlist-item:hover { opacity: .85; }
+    .watchlist-ticker { font-weight: 600; font-size: 14px; }
+    .watchlist-name { font-size: 11px; color: var(--text-dim); }
     .watchlist-price { text-align: right; }
-    .watchlist-price .price { font-weight: 700; font-size: 14px; }
-    .watchlist-price .change { font-size: 12px; font-weight: 600; }
+    .watchlist-price .price { font-weight: 600; font-size: 14px; }
+    .watchlist-price .change { font-size: 12px; }
 
     .watchlist-add {
       display: flex;
       gap: 8px;
-      margin-top: 14px;
+      margin-top: 12px;
     }
     .watchlist-add input {
       flex: 1;
-      padding: 9px 14px;
+      padding: 8px 12px;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 6px;
       color: var(--text);
       font-size: 13px;
-      font-family: inherit;
       outline: none;
-      transition: all var(--transition);
     }
-    .watchlist-add input:focus { border-color: var(--accent); }
 
-    /* ═══ EDUCATION POPUP ═══ */
+    /* Education popup */
     .edu-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.7);
-      backdrop-filter: blur(8px);
+      background: rgba(0,0,0,.6);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -886,150 +471,111 @@
     .edu-popup {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      width: 520px;
-      max-width: 92vw;
-      max-height: 85vh;
+      border-radius: 16px;
+      width: 500px;
+      max-width: 90vw;
+      max-height: 80vh;
       overflow-y: auto;
-      animation: popupIn .35s cubic-bezier(.16,1,.3,1);
-      box-shadow: var(--shadow-lg), 0 0 60px rgba(108,92,231,.08);
+      animation: slideUp .3s;
     }
-    @keyframes popupIn {
-      from { transform: translateY(20px) scale(.96); opacity: 0; }
-    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } }
 
     .edu-popup-header {
-      padding: 24px 28px;
+      padding: 20px 24px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: flex-start;
-      gap: 16px;
+      gap: 14px;
     }
     .edu-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 22px;
       flex-shrink: 0;
     }
-    .edu-icon.warning { background: var(--yellow-bg); border: 1px solid rgba(254,202,87,.15); }
-    .edu-icon.info { background: var(--blue-bg); border: 1px solid rgba(116,185,255,.15); }
-    .edu-icon.danger { background: var(--red-bg); border: 1px solid rgba(255,107,107,.15); }
-    .edu-popup-header h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
-    .edu-popup-header .edu-category {
-      font-size: 11px;
-      color: var(--accent2);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .8px;
-    }
+    .edu-icon.warning { background: var(--yellow-bg); }
+    .edu-icon.info { background: rgba(116,185,255,.12); }
+    .edu-icon.danger { background: var(--red-bg); }
+    .edu-popup-header h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .edu-popup-header .edu-category { font-size: 12px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
 
-    .edu-popup-body { padding: 24px 28px; }
-    .edu-popup-body p { font-size: 14px; line-height: 1.75; color: var(--text); margin-bottom: 16px; }
+    .edu-popup-body { padding: 20px 24px; }
+    .edu-popup-body p { font-size: 14px; line-height: 1.7; color: var(--text); margin-bottom: 14px; }
     .edu-popup-body .edu-tip {
       background: var(--bg);
       border-left: 3px solid var(--accent);
-      padding: 16px 18px;
-      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-      margin: 16px 0;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
       font-size: 13px;
-      line-height: 1.7;
-      color: var(--text-dim);
+      line-height: 1.6;
     }
 
     .edu-popup-footer {
-      padding: 18px 28px;
+      padding: 16px 24px;
       border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .edu-dont-show {
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-    }
-    .edu-dont-show input { accent-color: var(--accent); width: 14px; height: 14px; }
+    .edu-dont-show { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .edu-dont-show input { accent-color: var(--accent); }
 
-    /* ═══ TRADE HISTORY ═══ */
+    /* Trade History */
     .history-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 4px;
+      padding: 10px 0;
       border-bottom: 1px solid var(--border);
       font-size: 13px;
-      transition: background var(--transition);
     }
     .history-item:last-child { border-bottom: none; }
-    .history-item:hover { background: var(--surface2); }
     .history-badge {
-      padding: 3px 10px;
-      border-radius: 6px;
+      padding: 2px 8px;
+      border-radius: 4px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: .3px;
     }
     .history-badge.buy { background: var(--green-bg); color: var(--green); }
     .history-badge.sell { background: var(--red-bg); color: var(--red); }
 
-    /* ═══ LEARN PAGE ═══ */
+    /* Learn page */
     .lesson-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
     }
     .lesson-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
+      border-radius: 12px;
+      padding: 24px;
       cursor: pointer;
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
+      transition: all .2s;
     }
-    .lesson-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--gradient-accent);
-      opacity: 0;
-      transition: opacity var(--transition);
-    }
-    .lesson-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: var(--shadow-md), var(--shadow-glow); }
-    .lesson-card:hover::before { opacity: 1; }
-    .lesson-card .lesson-icon {
-      font-size: 32px;
-      margin-bottom: 16px;
-      display: block;
-    }
-    .lesson-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; letter-spacing: -.2px; }
-    .lesson-card p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
-    .lesson-tag {
+    .lesson-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .lesson-card .lesson-icon { font-size: 28px; margin-bottom: 12px; }
+    .lesson-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .lesson-card p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+    .lesson-card .lesson-tag {
       display: inline-block;
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 20px;
       font-size: 11px;
-      font-weight: 700;
-      margin-top: 16px;
-      letter-spacing: .3px;
+      font-weight: 600;
+      margin-top: 12px;
     }
     .lesson-tag.beginner { background: var(--green-bg); color: var(--green); }
     .lesson-tag.intermediate { background: var(--yellow-bg); color: var(--yellow); }
     .lesson-tag.advanced { background: var(--red-bg); color: var(--red); }
 
-    /* ═══ TOAST ═══ */
+    /* Toast */
     .toast-container {
       position: fixed;
       top: 20px;
@@ -1042,24 +588,22 @@
     .toast {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: 10px;
       padding: 14px 18px;
-      min-width: 300px;
-      max-width: 420px;
-      animation: toastIn .4s cubic-bezier(.16,1,.3,1);
+      min-width: 280px;
+      animation: slideIn .3s;
       display: flex;
       align-items: flex-start;
       gap: 10px;
       font-size: 13px;
-      box-shadow: var(--shadow-md);
     }
-    @keyframes toastIn { from { transform: translateX(100%) scale(.9); opacity: 0; } }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } }
     .toast.success { border-left: 3px solid var(--green); }
     .toast.error { border-left: 3px solid var(--red); }
     .toast.warning { border-left: 3px solid var(--yellow); }
     .toast.info { border-left: 3px solid var(--blue); }
 
-    /* ═══ LOADING ═══ */
+    /* Loading */
     .spinner {
       width: 20px;
       height: 20px;
@@ -1071,88 +615,34 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .skeleton {
-      background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 8px;
-    }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
     .empty-state {
       text-align: center;
-      padding: 48px 24px;
+      padding: 40px 20px;
+      color: var(--text-dim);
     }
-    .empty-state .empty-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      display: block;
-      opacity: .7;
-    }
-    .empty-state h4 {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .empty-state p { font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 280px; margin: 0 auto; }
+    .empty-state .emoji { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
 
-    /* ═══ CONFIG BANNER ═══ */
+    /* Config banner */
     .config-banner {
-      background: linear-gradient(135deg, rgba(108,92,231,.08), rgba(162,155,254,.06));
-      border: 1px solid rgba(108,92,231,.15);
-      color: var(--text-dim);
-      padding: 14px 22px;
-      border-radius: var(--radius-sm);
+      background: var(--yellow-bg);
+      color: var(--yellow);
+      padding: 12px 20px;
+      text-align: center;
       font-size: 13px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      border-bottom: 1px solid rgba(253,203,110,.3);
     }
-    .config-banner .banner-icon { font-size: 18px; }
-    .config-banner strong { color: var(--accent2); }
-
-    /* ═══ BACK BUTTON ═══ */
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-dim);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      padding: 6px 12px 6px 8px;
-      border-radius: 8px;
-      border: none;
-      background: none;
-      font-family: inherit;
-      transition: all var(--transition);
-      margin-bottom: 20px;
-    }
-    .back-btn:hover { color: var(--text); background: var(--surface2); }
-    .back-btn svg { width: 16px; height: 16px; }
-
-    /* ═══ LESSON DETAIL ═══ */
-    .lesson-detail { max-width: 720px; }
-    .lesson-detail .card-body p {
-      font-size: 14px;
-      line-height: 1.85;
-      margin-bottom: 18px;
-      color: var(--text-dim);
-    }
-    .lesson-detail .card-body p:last-child { margin-bottom: 0; }
-    .lesson-detail .card-header { background: var(--surface2); }
+    .config-banner a { color: var(--yellow); font-weight: 600; }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } = React;
+    const { useState, useEffect, useRef, useCallback, createContext, useContext } = React;
 
     // ═══════════════════════════════════════════════════════
-    // CONFIGURATION
+    // CONFIGURATION — Replace with your own keys
     // ═══════════════════════════════════════════════════════
     const FIREBASE_CONFIG = {
       apiKey: "YOUR_FIREBASE_API_KEY",
@@ -1162,11 +652,273 @@
       messagingSenderId: "YOUR_SENDER_ID",
       appId: "YOUR_APP_ID"
     };
+
+    // Get a free key at https://finnhub.io/register
     const FINNHUB_API_KEY = "YOUR_FINNHUB_API_KEY";
-    const STARTING_CASH = 100000;
+
+    const STARTING_CASH = 100000; // $100k starting paper money
 
     // ═══════════════════════════════════════════════════════
-    // FIREBASE
+    // I18N TRANSLATIONS
+    // ═══════════════════════════════════════════════════════
+    const TRANSLATIONS = {
+      en: {
+        // Nav
+        'nav.dashboard': 'Dashboard',
+        'nav.portfolio': 'Portfolio',
+        'nav.learn': 'Learn',
+        'nav.signOut': 'Sign Out',
+        'nav.tagline': 'Learn to trade, risk-free',
+
+        // Auth
+        'auth.title': 'PaperTrader',
+        'auth.subtitle': 'Learn to trade stocks without risking real money. Practice with $100k in virtual funds.',
+        'auth.google': 'Continue with Google',
+        'auth.or': 'or',
+        'auth.email': 'Email',
+        'auth.password': 'Password',
+        'auth.signIn': 'Sign In',
+        'auth.signUp': 'Create Account',
+        'auth.hasAccount': 'Already have an account?',
+        'auth.noAccount': "Don't have an account?",
+
+        // Dashboard
+        'dash.title': 'Dashboard',
+        'dash.portfolioValue': 'Portfolio Value',
+        'dash.cashAvailable': 'Cash Available',
+        'dash.invested': 'Invested',
+        'dash.totalTrades': 'Total Trades',
+        'dash.ofPortfolio': 'of portfolio',
+        'dash.positions': 'positions',
+        'dash.buys': 'buys',
+        'dash.sells': 'sells',
+        'dash.selectStock': 'Select a Stock',
+        'dash.readyToTrade': 'Ready to Trade',
+        'dash.readyDesc': 'Search for a stock above or click one from your watchlist to get started',
+        'dash.searchPlaceholder': 'Search stocks (e.g. AAPL, TSLA)...',
+
+        // Stock details
+        'stock.open': 'Open',
+        'stock.high': 'High',
+        'stock.low': 'Low',
+        'stock.prevClose': 'Prev Close',
+        'stock.volume': 'Volume',
+        'stock.marketCap': 'Market Cap',
+        'stock.industry': 'Industry',
+        'stock.news': 'Latest News',
+        'stock.noNews': 'No recent news available',
+
+        // Trade
+        'trade.title': 'Trade',
+        'trade.buy': 'Buy',
+        'trade.sell': 'Sell',
+        'trade.symbol': 'Symbol',
+        'trade.marketPrice': 'Market Price',
+        'trade.shares': 'Shares',
+        'trade.max': 'Max',
+        'trade.estimatedTotal': 'Estimated Total',
+        'trade.cashAvailable': 'Cash Available',
+        'trade.remainingCash': 'Remaining Cash',
+        'trade.cashAfterSale': 'Cash After Sale',
+        'trade.noStock': 'No Stock Selected',
+        'trade.noStockDesc': 'Search for a stock or pick one from your watchlist to start trading',
+        'trade.enterShares': 'Enter a valid number of shares',
+        'trade.insufficientFunds': 'Insufficient funds',
+        'trade.notEnoughShares': "You don't own enough shares",
+        'trade.bought': 'Bought',
+        'trade.sold': 'Sold',
+        'trade.sharesOf': 'shares of',
+        'trade.at': 'at',
+
+        // Watchlist
+        'watch.title': 'Watchlist',
+        'watch.stocks': 'stocks',
+        'watch.addPlaceholder': 'Add symbol...',
+
+        // Portfolio
+        'portfolio.title': 'Portfolio',
+        'portfolio.reset': 'Reset Portfolio',
+        'portfolio.resetMsg': 'Portfolio reset to $100,000',
+        'portfolio.totalValue': 'Total Value',
+        'portfolio.cash': 'Cash',
+        'portfolio.invested': 'Invested',
+        'portfolio.totalPnl': 'Total P&L',
+        'portfolio.openPositions': 'Open Positions',
+        'portfolio.noPositions': 'No Open Positions',
+        'portfolio.noPositionsDesc': 'Head to the Dashboard to make your first trade!',
+        'portfolio.tradeHistory': 'Trade History',
+        'portfolio.noTrades': 'No Trades Yet',
+        'portfolio.noTradesDesc': 'Your trade history will appear here',
+        'portfolio.symbol': 'Symbol',
+        'portfolio.shares': 'Shares',
+        'portfolio.avgCost': 'Avg Cost',
+        'portfolio.current': 'Current',
+        'portfolio.value': 'Value',
+        'portfolio.pnl': 'P&L',
+        'portfolio.return': 'Return',
+
+        // Learn
+        'learn.title': 'Learn to Trade',
+        'learn.subtitle': 'Build your trading knowledge from the ground up',
+        'learn.back': 'Back to Lessons',
+
+        // Education popups
+        'edu.cancel': 'Cancel',
+        'edu.understand': 'I Understand',
+        'edu.dontShow': "Don't show again",
+        'edu.gotIt': 'Got It',
+        'edu.techAnalysis': 'TECHNICAL ANALYSIS',
+
+        // Config banner
+        'config.demo': 'Running in',
+        'config.demoMode': 'demo mode',
+        'config.demoDesc': '— add your Firebase & Finnhub API keys in the source to enable real data and authentication',
+
+        // Misc
+        'time.ago.now': 'just now',
+        'time.ago.minutes': '{n}m ago',
+        'time.ago.hours': '{n}h ago',
+        'time.ago.days': '{n}d ago',
+      },
+      es: {
+        // Nav
+        'nav.dashboard': 'Panel',
+        'nav.portfolio': 'Portafolio',
+        'nav.learn': 'Aprender',
+        'nav.signOut': 'Cerrar Sesión',
+        'nav.tagline': 'Aprende a invertir, sin riesgo',
+
+        // Auth
+        'auth.title': 'PaperTrader',
+        'auth.subtitle': 'Aprende a invertir en acciones sin arriesgar dinero real. Practica con $100k en fondos virtuales.',
+        'auth.google': 'Continuar con Google',
+        'auth.or': 'o',
+        'auth.email': 'Correo electrónico',
+        'auth.password': 'Contraseña',
+        'auth.signIn': 'Iniciar Sesión',
+        'auth.signUp': 'Crear Cuenta',
+        'auth.hasAccount': '¿Ya tienes una cuenta?',
+        'auth.noAccount': '¿No tienes una cuenta?',
+
+        // Dashboard
+        'dash.title': 'Panel',
+        'dash.portfolioValue': 'Valor del Portafolio',
+        'dash.cashAvailable': 'Efectivo Disponible',
+        'dash.invested': 'Invertido',
+        'dash.totalTrades': 'Total de Operaciones',
+        'dash.ofPortfolio': 'del portafolio',
+        'dash.positions': 'posiciones',
+        'dash.buys': 'compras',
+        'dash.sells': 'ventas',
+        'dash.selectStock': 'Seleccionar una Acción',
+        'dash.readyToTrade': 'Listo para Invertir',
+        'dash.readyDesc': 'Busca una acción arriba o selecciona una de tu lista de seguimiento',
+        'dash.searchPlaceholder': 'Buscar acciones (ej. AAPL, TSLA)...',
+
+        // Stock details
+        'stock.open': 'Apertura',
+        'stock.high': 'Máximo',
+        'stock.low': 'Mínimo',
+        'stock.prevClose': 'Cierre Anterior',
+        'stock.volume': 'Volumen',
+        'stock.marketCap': 'Cap. de Mercado',
+        'stock.industry': 'Industria',
+        'stock.news': 'Últimas Noticias',
+        'stock.noNews': 'No hay noticias recientes disponibles',
+
+        // Trade
+        'trade.title': 'Operar',
+        'trade.buy': 'Comprar',
+        'trade.sell': 'Vender',
+        'trade.symbol': 'Símbolo',
+        'trade.marketPrice': 'Precio de Mercado',
+        'trade.shares': 'Acciones',
+        'trade.max': 'Máx',
+        'trade.estimatedTotal': 'Total Estimado',
+        'trade.cashAvailable': 'Efectivo Disponible',
+        'trade.remainingCash': 'Efectivo Restante',
+        'trade.cashAfterSale': 'Efectivo Después de Venta',
+        'trade.noStock': 'Ninguna Acción Seleccionada',
+        'trade.noStockDesc': 'Busca una acción o elige una de tu lista de seguimiento',
+        'trade.enterShares': 'Ingresa un número válido de acciones',
+        'trade.insufficientFunds': 'Fondos insuficientes',
+        'trade.notEnoughShares': 'No tienes suficientes acciones',
+        'trade.bought': 'Compraste',
+        'trade.sold': 'Vendiste',
+        'trade.sharesOf': 'acciones de',
+        'trade.at': 'a',
+
+        // Watchlist
+        'watch.title': 'Lista de Seguimiento',
+        'watch.stocks': 'acciones',
+        'watch.addPlaceholder': 'Agregar símbolo...',
+
+        // Portfolio
+        'portfolio.title': 'Portafolio',
+        'portfolio.reset': 'Reiniciar Portafolio',
+        'portfolio.resetMsg': 'Portafolio reiniciado a $100,000',
+        'portfolio.totalValue': 'Valor Total',
+        'portfolio.cash': 'Efectivo',
+        'portfolio.invested': 'Invertido',
+        'portfolio.totalPnl': 'G&P Total',
+        'portfolio.openPositions': 'Posiciones Abiertas',
+        'portfolio.noPositions': 'Sin Posiciones Abiertas',
+        'portfolio.noPositionsDesc': '¡Ve al Panel para hacer tu primera operación!',
+        'portfolio.tradeHistory': 'Historial de Operaciones',
+        'portfolio.noTrades': 'Sin Operaciones Aún',
+        'portfolio.noTradesDesc': 'Tu historial de operaciones aparecerá aquí',
+        'portfolio.symbol': 'Símbolo',
+        'portfolio.shares': 'Acciones',
+        'portfolio.avgCost': 'Costo Prom.',
+        'portfolio.current': 'Actual',
+        'portfolio.value': 'Valor',
+        'portfolio.pnl': 'G&P',
+        'portfolio.return': 'Retorno',
+
+        // Learn
+        'learn.title': 'Aprende a Invertir',
+        'learn.subtitle': 'Construye tu conocimiento de inversión desde cero',
+        'learn.back': 'Volver a Lecciones',
+
+        // Education popups
+        'edu.cancel': 'Cancelar',
+        'edu.understand': 'Entendido',
+        'edu.dontShow': 'No mostrar de nuevo',
+        'edu.gotIt': 'Entendido',
+        'edu.techAnalysis': 'ANÁLISIS TÉCNICO',
+
+        // Config banner
+        'config.demo': 'Ejecutando en',
+        'config.demoMode': 'modo demo',
+        'config.demoDesc': '— agrega tus claves de Firebase y Finnhub en el código fuente para habilitar datos reales y autenticación',
+
+        // Misc
+        'time.ago.now': 'ahora',
+        'time.ago.minutes': 'hace {n}m',
+        'time.ago.hours': 'hace {n}h',
+        'time.ago.days': 'hace {n}d',
+      }
+    };
+
+    const I18nContext = createContext(null);
+
+    function I18nProvider({ children }) {
+      const [locale, setLocale] = useState(() => localStorage.getItem('papertrader_locale') || 'en');
+      const t = useCallback((key, params = {}) => {
+        let str = TRANSLATIONS[locale]?.[key] || TRANSLATIONS.en[key] || key;
+        for (const [k, v] of Object.entries(params)) str = str.replace(`{${k}}`, v);
+        return str;
+      }, [locale]);
+      const setLanguage = useCallback(lang => {
+        setLocale(lang);
+        localStorage.setItem('papertrader_locale', lang);
+      }, []);
+      return <I18nContext.Provider value={{ locale, t, setLanguage }}>{children}</I18nContext.Provider>;
+    }
+    function useI18n() { return useContext(I18nContext); }
+
+    // ═══════════════════════════════════════════════════════
+    // FIREBASE INIT
     // ═══════════════════════════════════════════════════════
     let firebaseReady = false;
     try {
@@ -1174,144 +926,320 @@
         firebase.initializeApp(FIREBASE_CONFIG);
         firebaseReady = true;
       }
-    } catch (e) { console.warn("Firebase init failed:", e); }
+    } catch (e) {
+      console.warn("Firebase init failed:", e);
+    }
     const auth = firebaseReady ? firebase.auth() : null;
     const db = firebaseReady ? firebase.firestore() : null;
 
     // ═══════════════════════════════════════════════════════
-    // STOCK API
+    // STOCK DATA SERVICE (Finnhub)
     // ═══════════════════════════════════════════════════════
-    const apiKey = FINNHUB_API_KEY !== "YOUR_FINNHUB_API_KEY" ? FINNHUB_API_KEY : null;
+    const finnhubApiKey = FINNHUB_API_KEY !== "YOUR_FINNHUB_API_KEY" ? FINNHUB_API_KEY : null;
 
     async function searchSymbols(query) {
-      if (!apiKey || !query) return [];
+      if (!finnhubApiKey || !query) return [];
       try {
-        const res = await fetch(`https://finnhub.io/api/v1/search?q=${encodeURIComponent(query)}&token=${apiKey}`);
+        const res = await fetch(`https://finnhub.io/api/v1/search?q=${encodeURIComponent(query)}&token=${finnhubApiKey}`);
         const data = await res.json();
-        return (data.result || []).filter(r => r.type === "Common Stock" && !r.symbol.includes(".")).slice(0, 8);
+        return (data.result || [])
+          .filter(r => r.type === "Common Stock" && !r.symbol.includes("."))
+          .slice(0, 8);
       } catch { return []; }
     }
 
     async function getQuote(symbol) {
-      if (!apiKey) {
-        const base = ({ AAPL:189, MSFT:421, GOOGL:174, TSLA:248, AMZN:196 })[symbol] || (Math.random()*200+20);
-        const change = (Math.random()-0.5)*6;
-        return { c: base+change, h: base*1.02, l: base*0.98, o: base, pc: base, dp: (change/base)*100 };
+      if (!finnhubApiKey) {
+        // Demo data
+        const base = Math.random() * 200 + 20;
+        return { c: base, h: base*1.02, l: base*0.98, o: base*1.01, pc: base*0.99, dp: (Math.random()-0.5)*4 };
       }
       try {
-        const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`);
+        const res = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${finnhubApiKey}`);
         return await res.json();
       } catch { return null; }
     }
 
     async function getCandles(symbol, resolution = "D", from, to) {
-      if (!apiKey) {
+      if (!finnhubApiKey) {
+        // Generate demo candle data
         const candles = [];
-        let price = ({ AAPL:189, MSFT:421, GOOGL:174, TSLA:248, AMZN:196 })[symbol] || 150;
-        const now = Math.floor(Date.now()/1000);
-        for (let i=90; i>=0; i--) {
-          const t = now - i*86400;
-          price += (Math.random()-0.48)*4;
+        let price = 150;
+        const now = Math.floor(Date.now() / 1000);
+        for (let i = 90; i >= 0; i--) {
+          const t = now - i * 86400;
+          price += (Math.random() - 0.48) * 4;
           price = Math.max(20, price);
           candles.push({
             time: t,
-            open: price+(Math.random()-.5)*2,
-            high: price+Math.random()*3,
-            low: price-Math.random()*3,
+            open: price + (Math.random()-0.5)*2,
+            high: price + Math.random()*3,
+            low: price - Math.random()*3,
             close: price,
-            volume: Math.floor(Math.random()*5000000+500000)
+            volume: Math.floor(Math.random()*5000000)
           });
         }
         return candles;
       }
       if (!from) { to = Math.floor(Date.now()/1000); from = to - 90*86400; }
       try {
-        const res = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=${resolution}&from=${from}&to=${to}&token=${apiKey}`);
+        const res = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=${resolution}&from=${from}&to=${to}&token=${finnhubApiKey}`);
         const data = await res.json();
         if (data.s !== "ok") return [];
-        return data.t.map((t,i) => ({ time:t, open:data.o[i], high:data.h[i], low:data.l[i], close:data.c[i], volume:data.v[i] }));
+        return data.t.map((t, i) => ({
+          time: t, open: data.o[i], high: data.h[i], low: data.l[i], close: data.c[i], volume: data.v[i]
+        }));
+      } catch { return []; }
+    }
+
+    async function getCompanyProfile(symbol) {
+      if (!finnhubApiKey) {
+        const demo = {
+          AAPL:{ticker:"AAPL",name:"Apple Inc.",exchange:"NASDAQ",finnhubIndustry:"Consumer Electronics",marketCapitalization:2800000,weburl:"https://www.apple.com",logo:"https://static.finnhub.io/logo/apple.svg"},
+          MSFT:{ticker:"MSFT",name:"Microsoft Corporation",exchange:"NASDAQ",finnhubIndustry:"Software",marketCapitalization:2600000,weburl:"https://www.microsoft.com",logo:"https://static.finnhub.io/logo/microsoft.svg"},
+          GOOGL:{ticker:"GOOGL",name:"Alphabet Inc.",exchange:"NASDAQ",finnhubIndustry:"Internet Content & Information",marketCapitalization:1800000,weburl:"https://www.abc.xyz",logo:"https://static.finnhub.io/logo/google.svg"},
+          TSLA:{ticker:"TSLA",name:"Tesla Inc.",exchange:"NASDAQ",finnhubIndustry:"Auto Manufacturers",marketCapitalization:800000,weburl:"https://www.tesla.com",logo:"https://static.finnhub.io/logo/tesla.svg"},
+          AMZN:{ticker:"AMZN",name:"Amazon.com Inc.",exchange:"NASDAQ",finnhubIndustry:"Internet Retail",marketCapitalization:1600000,weburl:"https://www.amazon.com",logo:"https://static.finnhub.io/logo/amazon.svg"}
+        };
+        return demo[symbol] || {ticker:symbol,name:symbol,exchange:"NYSE/NASDAQ",finnhubIndustry:"Equity",marketCapitalization:50000,weburl:"",logo:""};
+      }
+      try {
+        const res = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${finnhubApiKey}`);
+        return await res.json();
+      } catch { return null; }
+    }
+
+    async function getCompanyNews(symbol) {
+      if (!finnhubApiKey) {
+        const now = Math.floor(Date.now()/1000);
+        const mk = (h, src) => ({id:now+h,headline:h,source:src,datetime:now-h*3600,summary:"Educational sample news item for demo mode.",url:"https://example.com",image:""});
+        return [
+          mk(`${symbol} launches new product line`,`MarketWatch`),
+          mk(`${symbol} beats earnings expectations`,`Reuters`),
+          mk(`Analysts upgrade ${symbol} to Buy`,`Bloomberg`),
+        ];
+      }
+      try {
+        const to = new Date();
+        const from = new Date(Date.now()-7*24*60*60*1000);
+        const f = from.toISOString().slice(0,10);
+        const t = to.toISOString().slice(0,10);
+        const res = await fetch(`https://finnhub.io/api/v1/company-news?symbol=${symbol}&from=${f}&to=${t}&token=${finnhubApiKey}`);
+        const data = await res.json();
+        return (Array.isArray(data)?data:[]).slice(-5).reverse();
       } catch { return []; }
     }
 
     // ═══════════════════════════════════════════════════════
-    // EDUCATION ENGINE
+    // EDUCATIONAL RULES ENGINE
     // ═══════════════════════════════════════════════════════
     const EDUCATION_RULES = {
       pdt_warning: {
-        id:"pdt_warning", title:"Pattern Day Trader (PDT) Rule", category:"REGULATION", icon:"warning", emoji:"\u26A0\uFE0F",
-        description:"You've made {count} day trades in the last 5 business days. The PDT rule states that if you make 4 or more day trades within 5 business days AND your account has less than $25,000, your account will be flagged and restricted.",
-        tip:"With your current balance of {balance}, you {status} meet the $25,000 threshold. {advice}",
-        check:(p,trade,h) => {
-          const ago = Date.now()-5*24*60*60*1000;
-          const recent = h.filter(x => { if(x.timestamp<ago) return false; return h.find(y => y.symbol===x.symbol && y.side!==x.side && y.timestamp>=x.timestamp && y.timestamp-x.timestamp<24*60*60*1000); });
-          const count = Math.floor(recent.length/2);
-          if(count>=3) { const bal=p.cash+Object.values(p.positions).reduce((s,x)=>s+x.shares*x.currentPrice,0); return { trigger:true, data:{ count, balance:fmt(bal), status:bal>=25000?"DO":"DO NOT", advice:bal>=25000?"Since your account exceeds $25k, the PDT rule won't restrict you. But it's still wise to be intentional about day trading.":"Consider holding positions overnight or reducing trade frequency to avoid being flagged."}}; }
-          return { trigger:false };
+        id: "pdt_warning",
+        title: "Pattern Day Trader (PDT) Rule",
+        title_es: "Regla de Day Trader Patrón (PDT)",
+        category: "REGULATION",
+        category_es: "REGULACIÓN",
+        icon: "warning",
+        emoji: "\u26A0\uFE0F",
+        description: "You've made {count} day trades in the last 5 business days. The PDT rule states that if you make 4 or more day trades within 5 business days AND your account has less than $25,000, your account will be flagged and restricted.",
+        description_es: "Has realizado {count} operaciones intradía en los últimos 5 días hábiles. La regla PDT indica que si haces 4 o más operaciones intradía en 5 días hábiles Y tu cuenta tiene menos de $25,000, tu cuenta será marcada y restringida.",
+        tip: "With your current balance of {balance}, you {status} meet the $25,000 threshold. {advice}",
+        tip_es: "Con tu saldo actual de {balance}, {status} cumples el umbral de $25,000. {advice}",
+        check: (portfolio, trade, history) => {
+          const fiveDaysAgo = Date.now() - 5 * 24 * 60 * 60 * 1000;
+          const recentDayTrades = history.filter(h => {
+            if (h.timestamp < fiveDaysAgo) return false;
+            const sameDay = history.find(h2 =>
+              h2.symbol === h.symbol &&
+              h2.side !== h.side &&
+              h2.timestamp >= h.timestamp &&
+              h2.timestamp - h.timestamp < 24*60*60*1000
+            );
+            return !!sameDay;
+          });
+          const count = Math.floor(recentDayTrades.length / 2);
+          if (count >= 3) {
+            const bal = portfolio.cash + Object.values(portfolio.positions).reduce((s, p) => s + p.shares * p.currentPrice, 0);
+            return {
+              trigger: true,
+              data: {
+                count: count,
+                balance: formatMoney(bal),
+                status: bal >= 25000 ? "DO" : "DO NOT",
+                advice: bal >= 25000
+                  ? "Since your account exceeds $25k, the PDT rule won't restrict you. But it's still wise to be intentional about day trading."
+                  : "Consider holding positions overnight or reducing trade frequency to avoid being flagged."
+              }
+            };
+          }
+          return { trigger: false };
         }
       },
       position_size: {
-        id:"position_size", title:"Position Sizing Warning", category:"RISK MANAGEMENT", icon:"warning", emoji:"\uD83D\uDCCA",
-        description:"This trade would represent {pct}% of your total portfolio value. Professional traders typically risk no more than 1-2% of their portfolio on any single trade.",
-        tip:"Consider reducing your position size. If losing this entire position would significantly impact your ability to trade, it's too large.",
-        check:(p,trade) => {
-          const total = p.cash+Object.values(p.positions).reduce((s,x)=>s+x.shares*x.currentPrice,0);
-          const pct = (trade.shares*trade.price/total)*100;
-          return pct>15 ? { trigger:true, data:{ pct:pct.toFixed(1) }} : { trigger:false };
+        id: "position_size",
+        title: "Position Sizing Warning",
+        title_es: "Advertencia de Tamaño de Posición",
+        category: "RISK MANAGEMENT",
+        category_es: "GESTIÓN DE RIESGO",
+        icon: "warning",
+        emoji: "\uD83D\uDCCA",
+        description: "This trade would represent {pct}% of your total portfolio value. Professional traders typically risk no more than 1-2% of their portfolio on any single trade, and rarely allocate more than 10% to a single position.",
+        description_es: "Esta operación representaría {pct}% del valor total de tu portafolio. Los traders profesionales suelen arriesgar no más del 1-2% en una sola operación y rara vez asignan más del 10% a una sola posición.",
+        tip: "Consider reducing your position size. A good rule of thumb: if losing this entire position would significantly impact your ability to trade, it's too large.",
+        tip_es: "Considera reducir el tamaño de tu posición. Regla general: si perder toda esta posición afectaría significativamente tu capacidad de seguir operando, es demasiado grande.",
+        check: (portfolio, trade) => {
+          const totalValue = portfolio.cash + Object.values(portfolio.positions).reduce((s, p) => s + p.shares * p.currentPrice, 0);
+          const tradeValue = trade.shares * trade.price;
+          const pct = (tradeValue / totalValue) * 100;
+          if (pct > 15) {
+            return { trigger: true, data: { pct: pct.toFixed(1) } };
+          }
+          return { trigger: false };
         }
       },
       concentration_risk: {
-        id:"concentration_risk", title:"Portfolio Concentration Risk", category:"RISK MANAGEMENT", icon:"warning", emoji:"\uD83C\uDFAF",
-        description:"After this trade, {symbol} would represent {pct}% of your portfolio. High concentration in a single stock dramatically increases your risk.",
-        tip:"Diversification is one of the most reliable ways to reduce portfolio risk. Consider spreading investments across different sectors.",
-        check:(p,trade) => {
-          if(trade.side!=="buy") return { trigger:false };
-          const total = p.cash+Object.values(p.positions).reduce((s,x)=>s+x.shares*x.currentPrice,0);
-          const existing = p.positions[trade.symbol]?.shares||0;
-          const pct = ((existing+trade.shares)*trade.price/total)*100;
-          return pct>25 ? { trigger:true, data:{ symbol:trade.symbol, pct:pct.toFixed(1) }} : { trigger:false };
+        id: "concentration_risk",
+        title: "Portfolio Concentration Risk",
+        title_es: "Riesgo de Concentración de Portafolio",
+        category: "RISK MANAGEMENT",
+        category_es: "GESTIÓN DE RIESGO",
+        icon: "warning",
+        emoji: "\uD83C\uDFAF",
+        description: "After this trade, {symbol} would represent {pct}% of your portfolio. High concentration in a single stock dramatically increases your risk.",
+        description_es: "Después de esta operación, {symbol} representaría {pct}% de tu portafolio. Una alta concentración en una sola acción incrementa dramáticamente tu riesgo.",
+        tip: "Diversification is one of the most reliable ways to reduce portfolio risk. Consider spreading investments across different sectors and asset types.",
+        tip_es: "La diversificación es una de las formas más confiables de reducir el riesgo del portafolio. Considera distribuir tus inversiones entre diferentes sectores y tipos de activos.",
+        check: (portfolio, trade) => {
+          if (trade.side !== "buy") return { trigger: false };
+          const totalValue = portfolio.cash + Object.values(portfolio.positions).reduce((s, p) => s + p.shares * p.currentPrice, 0);
+          const existingShares = portfolio.positions[trade.symbol]?.shares || 0;
+          const newValue = (existingShares + trade.shares) * trade.price;
+          const pct = (newValue / totalValue) * 100;
+          if (pct > 25) {
+            return { trigger: true, data: { symbol: trade.symbol, pct: pct.toFixed(1) } };
+          }
+          return { trigger: false };
         }
       },
       stop_loss_reminder: {
-        id:"stop_loss_reminder", title:"Set a Stop-Loss Order", category:"RISK MANAGEMENT", icon:"info", emoji:"\uD83D\uDEE1\uFE0F",
-        description:"You just bought {symbol}. Have you considered setting a stop-loss? A stop-loss automatically sells your position if the price drops to a specified level.",
-        tip:"A common approach: set a stop-loss 5-10% below your entry price. For a $100 stock, a 7% stop-loss at $93 caps your loss at $7/share.",
-        check:(p,trade) => trade.side==="buy" ? { trigger:true, data:{ symbol:trade.symbol }} : { trigger:false }
+        id: "stop_loss_reminder",
+        title: "Set a Stop-Loss Order",
+        title_es: "Configura una Orden Stop-Loss",
+        category: "RISK MANAGEMENT",
+        category_es: "GESTIÓN DE RIESGO",
+        icon: "info",
+        emoji: "\uD83D\uDEE1\uFE0F",
+        description: "You just bought {symbol}. Have you considered setting a stop-loss? A stop-loss automatically sells your position if the price drops to a specified level, limiting your potential loss.",
+        description_es: "Acabas de comprar {symbol}. ¿Has considerado fijar un stop-loss? Un stop-loss vende tu posición automáticamente si el precio cae a un nivel específico, limitando tu pérdida potencial.",
+        tip: "A common approach: set a stop-loss 5-10% below your entry price. For a $100 stock, a 7% stop-loss at $93 means you cap your loss at $7/share. This protects you from large unexpected drops.",
+        tip_es: "Un enfoque común: establece un stop-loss entre 5-10% por debajo de tu precio de entrada. Para una acción de $100, un stop-loss al 7% en $93 limita tu pérdida a $7 por acción y te protege de caídas bruscas.",
+        check: (portfolio, trade) => {
+          if (trade.side === "buy") {
+            return { trigger: true, data: { symbol: trade.symbol } };
+          }
+          return { trigger: false };
+        }
       },
       fomo_warning: {
-        id:"fomo_warning", title:"Chasing a Hot Stock?", category:"BEHAVIORAL", icon:"warning", emoji:"\uD83D\uDD25",
-        description:"{symbol} is up {pct}% today. Buying stocks that have already made large moves can be risky — this is often called 'chasing'.",
-        tip:"Ask yourself: Would I buy this stock if it hadn't moved today? If the answer is no, you might be driven by FOMO. Consider waiting for a pullback.",
-        check:(p,trade,h,quote) => {
-          if(trade.side!=="buy"||!quote) return { trigger:false };
-          const pct = quote.dp||((quote.c-quote.pc)/quote.pc*100);
-          return pct>5 ? { trigger:true, data:{ symbol:trade.symbol, pct:pct.toFixed(1) }} : { trigger:false };
+        id: "fomo_warning",
+        title: "Chasing a Hot Stock?",
+        title_es: "¿Persiguiendo una Acción de Moda?",
+        category: "BEHAVIORAL",
+        category_es: "COMPORTAMIENTO",
+        icon: "warning",
+        emoji: "\uD83D\uDD25",
+        description: "{symbol} is up {pct}% today. Buying stocks that have already made large moves can be risky — this is often called 'chasing'. The stock may have already priced in the good news.",
+        description_es: "{symbol} ha subido {pct}% hoy. Comprar acciones que ya han tenido grandes movimientos puede ser riesgoso — a esto se le llama 'perseguir el precio'. Es posible que la buena noticia ya esté reflejada en el precio.",
+        tip: "Ask yourself: Would I buy this stock if it hadn't moved today? If the answer is no, you might be driven by FOMO (Fear Of Missing Out). Consider waiting for a pullback or finding the next opportunity instead.",
+        tip_es: "Pregúntate: ¿Compraría esta acción si no se hubiera movido hoy? Si la respuesta es no, quizás estés actuando por FOMO (miedo a perderte la oportunidad). Considera esperar un retroceso o buscar la próxima oportunidad.",
+        check: (portfolio, trade, history, quote) => {
+          if (trade.side !== "buy" || !quote) return { trigger: false };
+          const pctChange = quote.dp || ((quote.c - quote.pc) / quote.pc * 100);
+          if (pctChange > 5) {
+            return { trigger: true, data: { symbol: trade.symbol, pct: pctChange.toFixed(1) } };
+          }
+          return { trigger: false };
         }
       },
       selling_at_loss: {
-        id:"selling_at_loss", title:"Selling at a Loss", category:"BEHAVIORAL", icon:"info", emoji:"\uD83E\uDD14",
-        description:"You're about to sell {symbol} at a {pct}% loss. Make sure this is a deliberate decision and not panic selling.",
-        tip:"Before selling: Is your original thesis still intact? Has something fundamentally changed? If the stock dropped on market-wide selling but the company is fine, selling might lock in an unnecessary loss.",
-        check:(p,trade) => {
-          if(trade.side!=="sell") return { trigger:false };
-          const pos = p.positions[trade.symbol];
-          if(!pos) return { trigger:false };
-          const pct = ((trade.price-pos.avgCost)/pos.avgCost)*100;
-          return pct<-3 ? { trigger:true, data:{ symbol:trade.symbol, pct:Math.abs(pct).toFixed(1) }} : { trigger:false };
+        id: "selling_at_loss",
+        title: "Selling at a Loss",
+        title_es: "Vendiendo con Pérdidas",
+        category: "BEHAVIORAL",
+        category_es: "COMPORTAMIENTO",
+        icon: "info",
+        emoji: "\uD83E\uDD14",
+        description: "You're about to sell {symbol} at a {pct}% loss. While it's important to cut losses, make sure this is a deliberate decision and not panic selling.",
+        description_es: "Estás a punto de vender {symbol} con una pérdida de {pct}%. Aunque es importante cortar pérdidas, asegúrate de que sea una decisión deliberada y no una venta por pánico.",
+        tip: "Before selling: Is your original thesis for buying still intact? Has something fundamentally changed? If the stock dropped on market-wide selling but the company is fine, selling might lock in an unnecessary loss. However, if your thesis is broken, cutting losses early is the smart move.",
+        tip_es: "Antes de vender: ¿Sigue vigente tu tesis original de compra? ¿Ha cambiado algo fundamental? Si la acción cayó por ventas generales del mercado pero la empresa sigue sólida, vender podría fijar una pérdida innecesaria. Si tu tesis está rota, cortar pérdidas temprano es lo más inteligente.",
+        check: (portfolio, trade) => {
+          if (trade.side !== "sell") return { trigger: false };
+          const position = portfolio.positions[trade.symbol];
+          if (!position) return { trigger: false };
+          const pctLoss = ((trade.price - position.avgCost) / position.avgCost) * 100;
+          if (pctLoss < -3) {
+            return { trigger: true, data: { symbol: trade.symbol, pct: Math.abs(pctLoss).toFixed(1) } };
+          }
+          return { trigger: false };
         }
       },
       first_trade: {
-        id:"first_trade", title:"Welcome to Paper Trading!", category:"GETTING STARTED", icon:"info", emoji:"\uD83C\uDF93",
-        description:"This is your first trade — exciting! Paper trading lets you practice with fake money so you can learn without risk. Your starting balance is {balance}.",
-        tip:"Start small! Even though it's fake money, treat it like real money to build good habits. Track why you're making each trade.",
-        check:(p,trade,h) => h.length===0 ? { trigger:true, data:{ balance:fmt(STARTING_CASH) }} : { trigger:false }
+        id: "first_trade",
+        title: "Welcome to Paper Trading!",
+        title_es: "¡Bienvenido al Paper Trading!",
+        category: "GETTING STARTED",
+        category_es: "EMPEZANDO",
+        icon: "info",
+        emoji: "\uD83C\uDF93",
+        description: "This is your first trade — exciting! Paper trading lets you practice with fake money so you can learn without risk. Your starting balance is {balance}.",
+        description_es: "Esta es tu primera operación — ¡emocionante! El paper trading te permite practicar con dinero ficticio para aprender sin riesgo. Tu saldo inicial es de {balance}.",
+        tip: "Start small! Even though it's fake money, treat it like real money to build good habits. Track why you're making each trade, and review your decisions regularly.",
+        tip_es: "¡Empieza pequeño! Aunque sea dinero ficticio, trátalo como real para construir buenos hábitos. Registra por qué haces cada operación y revisa tus decisiones con frecuencia.",
+        check: (portfolio, trade, history) => {
+          if (history.length === 0) {
+            return { trigger: true, data: { balance: formatMoney(STARTING_CASH) } };
+          }
+          return { trigger: false };
+        }
       }
     };
 
+    // Technical indicator education (shown when viewing charts)
     const INDICATOR_LESSONS = {
-      rsi: { title:"RSI (Relative Strength Index)", description:"RSI measures momentum on a scale of 0-100. Above 70 suggests the stock may be overbought (overpriced), while below 30 suggests it may be oversold (underpriced).", tip:"RSI works best in range-bound markets. In strong trends, a stock can stay overbought/oversold for extended periods." },
-      macd: { title:"MACD (Moving Average Convergence Divergence)", description:"MACD shows the relationship between two moving averages. When the MACD line crosses above the signal line, it's often a bullish signal. When it crosses below, it's bearish.", tip:"Don't use MACD in isolation. Combine it with price action and other indicators for confirmation." },
-      ma: { title:"Moving Averages (SMA & EMA)", description:"Moving averages smooth out price data to show trends. The 50-day and 200-day are most popular. When price is above the moving average, the trend is generally up.", tip:"The 'Golden Cross' (50-day crossing above 200-day) is a bullish signal. The 'Death Cross' is bearish." },
-      vol: { title:"Volume Analysis", description:"Volume shows how many shares were traded. High volume on up days confirms bullish moves. High volume on down days confirms bearish pressure.", tip:"A breakout on high volume is more likely to sustain than one on low volume. Always check volume to confirm price moves." }
+      rsi: {
+        title: "RSI (Relative Strength Index)",
+        title_es: "RSI (Índice de Fuerza Relativa)",
+        description: "RSI measures momentum on a scale of 0-100. Above 70 suggests the stock may be overbought (overpriced), while below 30 suggests it may be oversold (underpriced). It helps you time entries and exits.",
+        description_es: "El RSI mide el impulso en una escala de 0-100. Por encima de 70 sugiere que la acción puede estar sobrecomprada, por debajo de 30 que puede estar sobrevendida. Ayuda a cronometrar entradas y salidas.",
+        tip: "RSI works best in range-bound markets. In strong trends, a stock can stay overbought/oversold for extended periods.",
+        tip_es: "El RSI funciona mejor en mercados laterales. En tendencias fuertes, una acción puede permanecer sobrecomprada o sobrevendida durante largos periodos."
+      },
+      macd: {
+        title: "MACD (Moving Average Convergence Divergence)",
+        title_es: "MACD (Convergencia/Divergencia de Medias Móviles)",
+        description: "MACD shows the relationship between two moving averages. When the MACD line crosses above the signal line, it's often a bullish signal. When it crosses below, it's bearish.",
+        description_es: "El MACD muestra la relación entre dos medias móviles. Cuando la línea MACD cruza por encima de la señal suele ser una señal alcista; cuando cruza por debajo, bajista.",
+        tip: "Don't use MACD in isolation. Combine it with price action and other indicators for confirmation.",
+        tip_es: "No uses el MACD de forma aislada. Combínalo con la acción del precio y otros indicadores para confirmar señales."
+      },
+      moving_averages: {
+        title: "Moving Averages (SMA & EMA)",
+        title_es: "Medias Móviles (SMA y EMA)",
+        description: "Moving averages smooth out price data to show trends. The 50-day and 200-day are most popular. When price is above the moving average, the trend is generally up; below means down.",
+        description_es: "Las medias móviles suavizan el precio para mostrar tendencias. Las más usadas son las de 50 y 200 días. Precio por encima de la media suele indicar tendencia alcista; por debajo, bajista.",
+        tip: "The 'Golden Cross' (50-day crossing above 200-day) is a bullish signal. The 'Death Cross' (opposite) is bearish. These are slow signals but historically reliable.",
+        tip_es: "El 'Golden Cross' (la de 50 cruza por encima de la de 200) es una señal alcista. El 'Death Cross' es bajista. Son señales lentas pero históricamente confiables."
+      },
+      volume: {
+        title: "Volume Analysis",
+        title_es: "Análisis de Volumen",
+        description: "Volume shows how many shares were traded. High volume on up days confirms bullish moves. High volume on down days confirms bearish pressure. Low volume moves are less reliable.",
+        description_es: "El volumen muestra cuántas acciones se negociaron. Alto volumen en días alcistas confirma el movimiento; en días bajistas confirma la presión de venta. Movimientos con poco volumen son menos fiables.",
+        tip: "A breakout on high volume is more likely to sustain than one on low volume. Always check volume to confirm price moves.",
+        tip_es: "Un rompimiento con alto volumen tiene más probabilidades de mantenerse que uno con poco volumen. Revisa siempre el volumen para confirmar los movimientos de precio."
+      }
     };
 
     function checkEducationalRules(portfolio, trade, history, quote) {
@@ -1320,7 +1248,9 @@
       for (const [key, rule] of Object.entries(EDUCATION_RULES)) {
         if (dismissed[key]) continue;
         const result = rule.check(portfolio, trade, history, quote);
-        if (result.trigger) triggered.push({ ...rule, data: result.data });
+        if (result.trigger) {
+          triggered.push({ ...rule, data: result.data });
+        }
       }
       return triggered;
     }
@@ -1328,8 +1258,19 @@
     // ═══════════════════════════════════════════════════════
     // HELPERS
     // ═══════════════════════════════════════════════════════
-    function fmt(n) { return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n); }
-    function fmtPct(n) { return `${n>=0?'+':''}${n.toFixed(2)}%`; }
+    function formatMoney(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
+    }
+    function formatPct(n) {
+      const sign = n >= 0 ? '+' : '';
+      return `${sign}${n.toFixed(2)}%`;
+    }
+    function formatNum(n) {
+      if (n >= 1e9) return (n/1e9).toFixed(1) + 'B';
+      if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+      if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+      return n.toString();
+    }
 
     // ═══════════════════════════════════════════════════════
     // CONTEXTS
@@ -1339,22 +1280,7 @@
     const ToastContext = createContext(null);
 
     // ═══════════════════════════════════════════════════════
-    // ICONS (inline SVGs)
-    // ═══════════════════════════════════════════════════════
-    const Icon = {
-      dashboard: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>,
-      portfolio: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/></svg>,
-      learn: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-      logout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-      search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
-      menu: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>,
-      back: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>,
-      arrowUp: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M8 12V4m0 0L4 8m4-4l4 4"/></svg>,
-      arrowDown: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M8 4v8m0 0l4-4m-4 4L4 8"/></svg>,
-    };
-
-    // ═══════════════════════════════════════════════════════
-    // TOAST PROVIDER
+    // TOAST SYSTEM
     // ═══════════════════════════════════════════════════════
     function ToastProvider({ children }) {
       const [toasts, setToasts] = useState([]);
@@ -1369,7 +1295,7 @@
           <div className="toast-container">
             {toasts.map(t => (
               <div key={t.id} className={`toast ${t.type}`}>
-                <span>{t.type==="success"?"\u2705":t.type==="error"?"\u274C":t.type==="warning"?"\u26A0\uFE0F":"\u2139\uFE0F"}</span>
+                <span>{t.type === "success" ? "\u2705" : t.type === "error" ? "\u274C" : t.type === "warning" ? "\u26A0\uFE0F" : "\u2139\uFE0F"}</span>
                 <span>{t.msg}</span>
               </div>
             ))}
@@ -1384,17 +1310,42 @@
     function AuthProvider({ children }) {
       const [user, setUser] = useState(null);
       const [loading, setLoading] = useState(true);
+
       useEffect(() => {
-        if (!auth) { setUser({ uid:"demo", email:"demo@papertrader.app", displayName:"Demo User" }); setLoading(false); return; }
-        return auth.onAuthStateChanged(u => { setUser(u); setLoading(false); });
+        if (!auth) {
+          // Demo mode — auto-login
+          setUser({ uid: "demo", email: "demo@papertrader.app", displayName: "Demo User" });
+          setLoading(false);
+          return;
+        }
+        return auth.onAuthStateChanged(u => {
+          setUser(u);
+          setLoading(false);
+        });
       }, []);
-      const loginEmail = async (e, p) => auth && auth.signInWithEmailAndPassword(e, p);
-      const signupEmail = async (e, p) => auth && auth.createUserWithEmailAndPassword(e, p);
-      const loginGoogle = async () => { if (!auth) return; return auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); };
+
+      const loginEmail = async (email, password) => {
+        if (!auth) return;
+        return auth.signInWithEmailAndPassword(email, password);
+      };
+      const signupEmail = async (email, password) => {
+        if (!auth) return;
+        return auth.createUserWithEmailAndPassword(email, password);
+      };
+      const loginGoogle = async () => {
+        if (!auth) return;
+        const provider = new firebase.auth.GoogleAuthProvider();
+        return auth.signInWithPopup(provider);
+      };
       const logout = () => auth ? auth.signOut() : setUser(null);
 
-      if (loading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--bg)'}}><div className="spinner" style={{width:36,height:36,borderWidth:3}}/></div>;
-      return <AuthContext.Provider value={{ user, loginEmail, signupEmail, loginGoogle, logout }}>{children}</AuthContext.Provider>;
+      if (loading) return <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}><div className="spinner" style={{width:40,height:40}}/></div>;
+
+      return (
+        <AuthContext.Provider value={{ user, loginEmail, signupEmail, loginGoogle, logout }}>
+          {children}
+        </AuthContext.Provider>
+      );
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1406,31 +1357,60 @@
       const [history, setHistory] = useState([]);
       const [loading, setLoading] = useState(true);
 
-      useEffect(() => { if (user) loadPortfolio(); }, [user]);
+      useEffect(() => {
+        if (!user) return;
+        loadPortfolio();
+      }, [user]);
 
-      const loadPortfolio = () => {
-        const saved = localStorage.getItem(`portfolio_${user.uid}`);
-        if (saved) { const d = JSON.parse(saved); setPortfolio(d.portfolio); setHistory(d.history||[]); }
-        else { setPortfolio({ cash: STARTING_CASH, positions: {} }); setHistory([]); }
+      const loadPortfolio = async () => {
+        const key = `portfolio_${user.uid}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          const data = JSON.parse(saved);
+          setPortfolio(data.portfolio);
+          setHistory(data.history || []);
+        } else {
+          setPortfolio({ cash: STARTING_CASH, positions: {} });
+          setHistory([]);
+        }
         setLoading(false);
       };
-      const save = (p, h) => localStorage.setItem(`portfolio_${user.uid}`, JSON.stringify({ portfolio:p, history:h }));
+
+      const save = (p, h) => {
+        const key = `portfolio_${user.uid}`;
+        localStorage.setItem(key, JSON.stringify({ portfolio: p, history: h }));
+      };
 
       const executeTrade = (symbol, shares, price, side) => {
         setPortfolio(prev => {
           const next = { ...prev, positions: { ...prev.positions } };
           if (side === "buy") {
-            next.cash -= shares*price;
-            const ex = next.positions[symbol];
-            if (ex) { const ts = ex.shares+shares; next.positions[symbol] = { shares:ts, avgCost:(ex.avgCost*ex.shares+price*shares)/ts, currentPrice:price }; }
-            else { next.positions[symbol] = { shares, avgCost:price, currentPrice:price }; }
+            const cost = shares * price;
+            next.cash -= cost;
+            const existing = next.positions[symbol];
+            if (existing) {
+              const totalShares = existing.shares + shares;
+              const totalCost = existing.avgCost * existing.shares + price * shares;
+              next.positions[symbol] = { shares: totalShares, avgCost: totalCost / totalShares, currentPrice: price };
+            } else {
+              next.positions[symbol] = { shares, avgCost: price, currentPrice: price };
+            }
           } else {
-            const ex = next.positions[symbol];
-            if (ex) { next.cash += shares*price; const rem = ex.shares-shares; if (rem<=0) delete next.positions[symbol]; else next.positions[symbol] = { ...ex, shares:rem, currentPrice:price }; }
+            const existing = next.positions[symbol];
+            if (existing) {
+              next.cash += shares * price;
+              const remainingShares = existing.shares - shares;
+              if (remainingShares <= 0) {
+                delete next.positions[symbol];
+              } else {
+                next.positions[symbol] = { ...existing, shares: remainingShares, currentPrice: price };
+              }
+            }
           }
-          const newH = [...history, { symbol, shares, price, side, timestamp: Date.now() }];
-          setHistory(newH);
-          save(next, newH);
+          const newTrade = { symbol, shares, price, side, timestamp: Date.now() };
+          const newHistory = [...history, newTrade];
+          setHistory(newHistory);
+          save(next, newHistory);
           return next;
         });
       };
@@ -1444,39 +1424,72 @@
         });
       };
 
-      const resetPortfolio = () => { const p = { cash:STARTING_CASH, positions:{} }; setPortfolio(p); setHistory([]); save(p,[]); };
+      const resetPortfolio = () => {
+        const p = { cash: STARTING_CASH, positions: {} };
+        const h = [];
+        setPortfolio(p);
+        setHistory(h);
+        save(p, h);
+      };
 
       if (loading) return null;
-      return <PortfolioContext.Provider value={{ portfolio, history, executeTrade, updatePrice, resetPortfolio }}>{children}</PortfolioContext.Provider>;
+
+      return (
+        <PortfolioContext.Provider value={{ portfolio, history, executeTrade, updatePrice, resetPortfolio }}>
+          {children}
+        </PortfolioContext.Provider>
+      );
     }
 
     // ═══════════════════════════════════════════════════════
-    // EDUCATIONAL POPUP
+    // EDUCATIONAL POPUP COMPONENT
     // ═══════════════════════════════════════════════════════
     function EducationalPopup({ rule, onClose, onProceed }) {
+      const { locale } = useI18n();
       const [dontShow, setDontShow] = useState(false);
+
       const handleProceed = () => {
-        if (dontShow) { const d = JSON.parse(localStorage.getItem("edu_dismissed")||"{}"); d[rule.id] = true; localStorage.setItem("edu_dismissed", JSON.stringify(d)); }
+        if (dontShow) {
+          const dismissed = JSON.parse(localStorage.getItem("edu_dismissed") || "{}");
+          dismissed[rule.id] = true;
+          localStorage.setItem("edu_dismissed", JSON.stringify(dismissed));
+        }
         onProceed();
       };
-      let desc = rule.description, tip = rule.tip;
-      if (rule.data) { for (const [k,v] of Object.entries(rule.data)) { desc = desc.replace(`{${k}}`,v); tip = tip.replace(`{${k}}`,v); } }
+
+      const title = locale === "es" ? (rule.title_es || rule.title) : rule.title;
+      const category = locale === "es" ? (rule.category_es || rule.category) : rule.category;
+      let desc = locale === "es" ? (rule.description_es || rule.description) : rule.description;
+      let tip = locale === "es" ? (rule.tip_es || rule.tip) : rule.tip;
+      if (rule.data) {
+        for (const [k, v] of Object.entries(rule.data)) {
+          desc = desc.replace(`{${k}}`, v);
+          tip = tip.replace(`{${k}}`, v);
+        }
+      }
+
       return (
-        <div className="edu-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
+        <div className="edu-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
           <div className="edu-popup">
             <div className="edu-popup-header">
               <div className={`edu-icon ${rule.icon}`}>{rule.emoji}</div>
-              <div><div className="edu-category">{rule.category}</div><h3>{rule.title}</h3></div>
+              <div>
+                <div className="edu-category">{category}</div>
+                <h3>{title}</h3>
+              </div>
             </div>
             <div className="edu-popup-body">
               <p>{desc}</p>
               <div className="edu-tip">{tip}</div>
             </div>
             <div className="edu-popup-footer">
-              <label className="edu-dont-show"><input type="checkbox" checked={dontShow} onChange={e => setDontShow(e.target.checked)} />Don't show again</label>
+              <label className="edu-dont-show">
+                <input type="checkbox" checked={dontShow} onChange={e => setDontShow(e.target.checked)} />
+                {useI18n().t('edu.dontShow')}
+              </label>
               <div style={{display:'flex',gap:8}}>
-                <button className="btn btn-outline btn-sm" onClick={onClose}>Cancel</button>
-                <button className="btn btn-primary btn-sm" onClick={handleProceed}>I Understand</button>
+                <button className="btn btn-outline btn-sm" onClick={onClose}>{useI18n().t('edu.cancel')}</button>
+                <button className="btn btn-primary btn-sm" onClick={handleProceed}>{useI18n().t('edu.understand')}</button>
               </div>
             </div>
           </div>
@@ -1484,18 +1497,32 @@
       );
     }
 
+    // Indicator lesson popup
     function IndicatorPopup({ indicator, onClose }) {
+      const { locale, t } = useI18n();
       const lesson = INDICATOR_LESSONS[indicator];
       if (!lesson) return null;
+      const title = locale === "es" ? (lesson.title_es || lesson.title) : lesson.title;
+      const desc = locale === "es" ? (lesson.description_es || lesson.description) : lesson.description;
+      const tip = locale === "es" ? (lesson.tip_es || lesson.tip) : lesson.tip;
       return (
-        <div className="edu-overlay" onClick={e => e.target===e.currentTarget && onClose()}>
+        <div className="edu-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
           <div className="edu-popup">
             <div className="edu-popup-header">
               <div className="edu-icon info">{"\uD83D\uDCC8"}</div>
-              <div><div className="edu-category">TECHNICAL ANALYSIS</div><h3>{lesson.title}</h3></div>
+              <div>
+                <div className="edu-category">{t('edu.techAnalysis')}</div>
+                <h3>{title}</h3>
+              </div>
             </div>
-            <div className="edu-popup-body"><p>{lesson.description}</p><div className="edu-tip">{lesson.tip}</div></div>
-            <div className="edu-popup-footer"><div/><button className="btn btn-primary btn-sm" onClick={onClose}>Got It</button></div>
+            <div className="edu-popup-body">
+              <p>{desc}</p>
+              <div className="edu-tip">{tip}</div>
+            </div>
+            <div className="edu-popup-footer">
+              <div/>
+              <button className="btn btn-primary btn-sm" onClick={onClose}>{t('edu.gotIt')}</button>
+            </div>
           </div>
         </div>
       );
@@ -1506,6 +1533,7 @@
     // ═══════════════════════════════════════════════════════
     function LoginPage() {
       const { loginEmail, signupEmail, loginGoogle } = useContext(AuthContext);
+      const { locale, t, setLanguage } = useI18n();
       const [isSignup, setIsSignup] = useState(false);
       const [email, setEmail] = useState("");
       const [password, setPassword] = useState("");
@@ -1513,34 +1541,58 @@
       const [loading, setLoading] = useState(false);
 
       const handleSubmit = async (e) => {
-        e.preventDefault(); setError(""); setLoading(true);
-        try { if (isSignup) await signupEmail(email, password); else await loginEmail(email, password); }
-        catch (err) { setError(err.message || "Authentication failed"); }
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+        try {
+          if (isSignup) await signupEmail(email, password);
+          else await loginEmail(email, password);
+        } catch (err) {
+          setError(err.message || "Authentication failed");
+        }
         setLoading(false);
       };
 
       return (
         <div className="auth-page">
           <div className="auth-card">
-            <div className="logo-row">
-              <div className="logo-icon">{"\uD83D\uDCC8"}</div>
-              <div>
-                <h1>PaperTrader</h1>
-              </div>
+            <div style={{display:'flex',justifyContent:'flex-end',marginBottom:8}}>
+              <button className={`chart-btn ${locale === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')} style={{marginRight:4}}>EN</button>
+              <button className={`chart-btn ${locale === 'es' ? 'active' : ''}`} onClick={() => setLanguage('es')}>ES</button>
             </div>
-            <p className="subtitle">Learn to trade stocks without risking real money. Practice with $100k in virtual funds.</p>
+            <span className="logo">{"\uD83D\uDCC8"}</span>
+            <h1>{t('auth.title')}</h1>
+            <p className="subtitle">{t('auth.subtitle')}</p>
+
             {error && <div className="error-msg">{error}</div>}
+
             <button className="btn btn-google" onClick={loginGoogle}>
               <svg width="18" height="18" viewBox="0 0 18 18"><path d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z" fill="#4285F4"/><path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z" fill="#34A853"/><path d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z" fill="#FBBC05"/><path d="M8.98 3.58c1.16 0 2.2.4 3.02 1.18l2.27-2.26A8 8 0 0 0 1.83 5.4L4.5 7.49A4.77 4.77 0 0 1 8.98 3.58z" fill="#EA4335"/></svg>
-              Continue with Google
+              {t('auth.google')}
             </button>
-            <div className="divider">or</div>
+
+            <div className="divider">{t('auth.or')}</div>
+
             <form onSubmit={handleSubmit}>
-              <div className="input-group"><label>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" required /></div>
-              <div className="input-group"><label>Password</label><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Min 6 characters" required /></div>
-              <button className="btn btn-primary" type="submit" disabled={loading}>{loading ? <span className="spinner"/> : (isSignup ? "Create Account" : "Sign In")}</button>
+              <div className="input-group">
+                <label>{t('auth.email')}</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required />
+              </div>
+              <div className="input-group">
+                <label>{t('auth.password')}</label>
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="******" required />
+              </div>
+              <button className="btn btn-primary" type="submit" disabled={loading}>
+                {loading ? <span className="spinner"/> : (isSignup ? t('auth.signUp') : t('auth.signIn'))}
+              </button>
             </form>
-            <div className="auth-toggle">{isSignup?"Already have an account? ":"Don't have an account? "}<a onClick={()=>{setIsSignup(!isSignup);setError("")}}>{isSignup?"Sign In":"Sign Up"}</a></div>
+
+            <div className="auth-toggle">
+              {isSignup ? t('auth.hasAccount') + " " : t('auth.noAccount') + " "}
+              <a onClick={() => { setIsSignup(!isSignup); setError(""); }}>
+                {isSignup ? t('auth.signIn') : t('auth.signUp')}
+              </a>
+            </div>
           </div>
         </div>
       );
@@ -1549,69 +1601,125 @@
     // ═══════════════════════════════════════════════════════
     // STOCK CHART
     // ═══════════════════════════════════════════════════════
-    function StockChart({ symbol }) {
+    function StockChart({ symbol, onCandles }) {
       const chartRef = useRef(null);
       const chartInstance = useRef(null);
+      const resizeObserverRef = useRef(null);
       const [resolution, setResolution] = useState("D");
       const [showIndicator, setShowIndicator] = useState(null);
-      const [loading, setLoading] = useState(false);
 
       useEffect(() => {
         if (!chartRef.current || !symbol) return;
-        loadChart();
-        return () => { if (chartInstance.current) { chartInstance.current.remove(); chartInstance.current = null; }};
+        let cancelled = false;
+        const ensureChart = () => {
+          const container = chartRef.current;
+          if (!container || container.clientWidth === 0) {
+            requestAnimationFrame(ensureChart);
+            return;
+          }
+          loadChart(container, cancelled);
+        };
+        ensureChart();
+        return () => {
+          cancelled = true;
+          if (resizeObserverRef.current && chartRef.current) {
+            resizeObserverRef.current.disconnect();
+            resizeObserverRef.current = null;
+          }
+          if (chartInstance.current) {
+            chartInstance.current.remove();
+            chartInstance.current = null;
+          }
+        };
       }, [symbol, resolution]);
 
-      const loadChart = async () => {
-        setLoading(true);
-        if (chartInstance.current) chartInstance.current.remove();
-        const container = chartRef.current;
-        const chart = LightweightCharts.createChart(container, {
-          width: container.clientWidth, height: 380,
-          layout: { background: { type:'solid', color:'#141720' }, textColor:'#6b7194', fontFamily:'Inter' },
-          grid: { vertLines: { color:'#1e2235' }, horzLines: { color:'#1e2235' } },
-          crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color:'rgba(108,92,231,.4)' }, horzLine: { color:'rgba(108,92,231,.4)' } },
-          rightPriceScale: { borderColor:'#1e2235' },
-          timeScale: { borderColor:'#1e2235', timeVisible: resolution!=="D"&&resolution!=="W" },
-        });
-        chartInstance.current = chart;
-        const candles = await getCandles(symbol, resolution);
-        if (candles.length > 0) {
-          const cs = chart.addCandlestickSeries({ upColor:'#00cec9', downColor:'#ff6b6b', borderUpColor:'#00cec9', borderDownColor:'#ff6b6b', wickUpColor:'#00cec9', wickDownColor:'#ff6b6b' });
-          cs.setData(candles.map(c => ({ time:c.time, open:c.open, high:c.high, low:c.low, close:c.close })));
-          if (candles.length >= 20) {
-            const sma = []; for (let i=19;i<candles.length;i++) { const s = candles.slice(i-19,i+1).reduce((a,c)=>a+c.close,0); sma.push({ time:candles[i].time, value:s/20 }); }
-            chart.addLineSeries({ color:'#a29bfe', lineWidth:1.5, crosshairMarkerVisible:false }).setData(sma);
+      const loadChart = async (container, cancelled) => {
+        try {
+          if (chartInstance.current) {
+            chartInstance.current.remove();
+            chartInstance.current = null;
           }
-          const vol = chart.addHistogramSeries({ priceFormat:{type:'volume'}, priceScaleId:'' });
-          chart.priceScale('').applyOptions({ scaleMargins:{ top:.82, bottom:0 }});
-          vol.setData(candles.map(c => ({ time:c.time, value:c.volume, color:c.close>=c.open?'rgba(0,206,201,.2)':'rgba(255,107,107,.2)' })));
+          if (!container || cancelled) return;
+          const chart = LightweightCharts.createChart(container, {
+            width: container.clientWidth,
+            height: 350,
+            layout: { background: { type: 'solid', color: '#1a1d27' }, textColor: '#8b8fa3' },
+            grid: { vertLines: { color: '#2e3348' }, horzLines: { color: '#2e3348' } },
+            crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+            rightPriceScale: { borderColor: '#2e3348' },
+            timeScale: { borderColor: '#2e3348', timeVisible: resolution !== 'D' && resolution !== 'W' },
+          });
+          chartInstance.current = chart;
+
+          const candles = await getCandles(symbol, resolution);
+          if (cancelled) return;
+          if (Array.isArray(candles) && candles.length > 0) {
+            const candleSeries = chart.addCandlestickSeries({
+              upColor: '#00b894', downColor: '#e74c3c',
+              borderUpColor: '#00b894', borderDownColor: '#e74c3c',
+              wickUpColor: '#00b894', wickDownColor: '#e74c3c',
+            });
+            candleSeries.setData(candles.map(c => ({
+              time: c.time,
+              open: c.open, high: c.high, low: c.low, close: c.close
+            })));
+
+            if (onCandles) onCandles(candles);
+
+            if (candles.length >= 20) {
+              const smaData = [];
+              for (let i = 19; i < candles.length; i++) {
+                const sum = candles.slice(i-19, i+1).reduce((s, c) => s + c.close, 0);
+                smaData.push({ time: candles[i].time, value: sum / 20 });
+              }
+              const smaSeries = chart.addLineSeries({ color: '#74b9ff', lineWidth: 1 });
+              smaSeries.setData(smaData);
+            }
+
+            const volumeSeries = chart.addHistogramSeries({
+              priceFormat: { type: 'volume' },
+              priceScaleId: '',
+            });
+            chart.priceScale('').applyOptions({
+              scaleMargins: { top: 0.8, bottom: 0 },
+            });
+            volumeSeries.setData(candles.map(c => ({
+              time: c.time,
+              value: c.volume,
+              color: c.close >= c.open ? 'rgba(0,184,148,0.3)' : 'rgba(231,76,60,0.3)'
+            })));
+          }
+          chart.timeScale().fitContent();
+
+          const ro = new ResizeObserver(() => {
+            if (!chartRef.current) return;
+            chart.applyOptions({ width: chartRef.current.clientWidth || 0 });
+          });
+          ro.observe(container);
+          resizeObserverRef.current = ro;
+        } catch (e) {
+          console.warn("Chart error", e);
         }
-        chart.timeScale().fitContent();
-        const ro = new ResizeObserver(() => chart.applyOptions({ width:container.clientWidth }));
-        ro.observe(container);
-        setLoading(false);
       };
 
       return (
         <div>
-          <div className="chart-toolbar">
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
             <div className="chart-controls">
               {["5","15","60","D","W"].map(r => (
-                <button key={r} className={`chart-btn ${resolution===r?'active':''}`} onClick={()=>setResolution(r)}>{r==="60"?"1H":r}</button>
+                <button key={r} className={`chart-btn ${resolution === r ? 'active' : ''}`}
+                  onClick={() => setResolution(r)}>{r === "60" ? "1H" : r}</button>
               ))}
             </div>
             <div className="chart-controls">
-              {[["rsi","RSI"],["macd","MACD"],["ma","MA"],["vol","VOL"]].map(([k,label]) => (
-                <button key={k} className="chart-btn-indicator" onClick={()=>setShowIndicator(k)}>{label}</button>
+              {["rsi","macd","moving_averages","volume"].map(ind => (
+                <button key={ind} className="chart-btn" onClick={() => setShowIndicator(ind)}
+                  style={{fontSize:11}}>{ind === "moving_averages" ? "MA" : ind.toUpperCase()}</button>
               ))}
             </div>
           </div>
-          <div style={{position:'relative'}}>
-            <div ref={chartRef} id="chart-container" />
-            {loading && <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(20,23,32,.6)'}}><div className="spinner" style={{width:28,height:28}}/></div>}
-          </div>
-          {showIndicator && <IndicatorPopup indicator={showIndicator} onClose={()=>setShowIndicator(null)} />}
+          <div ref={chartRef} style={{width:'100%',height:350,borderRadius:8,overflow:'hidden'}} />
+          {showIndicator && <IndicatorPopup indicator={showIndicator} onClose={() => setShowIndicator(null)} />}
         </div>
       );
     }
@@ -1620,26 +1728,43 @@
     // SEARCH BAR
     // ═══════════════════════════════════════════════════════
     function SearchBar({ onSelect }) {
+      const { t } = useI18n();
       const [query, setQuery] = useState("");
       const [results, setResults] = useState([]);
       const [show, setShow] = useState(false);
-      const timeout = useRef(null);
-      const handleChange = val => {
+      const timeoutRef = useRef(null);
+
+      const handleChange = (val) => {
         setQuery(val);
-        clearTimeout(timeout.current);
+        clearTimeout(timeoutRef.current);
         if (val.length < 1) { setResults([]); setShow(false); return; }
-        timeout.current = setTimeout(async () => { const r = await searchSymbols(val); setResults(r); setShow(r.length > 0); }, 300);
+        timeoutRef.current = setTimeout(async () => {
+          const r = await searchSymbols(val);
+          setResults(r);
+          setShow(r.length > 0);
+        }, 300);
       };
+
       return (
         <div className="search-box">
-          <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input placeholder="Search stocks (e.g. AAPL, TSLA)..." value={query} onChange={e=>handleChange(e.target.value)} onFocus={()=>results.length&&setShow(true)} onBlur={()=>setTimeout(()=>setShow(false),200)} />
-          {show && <div className="search-results">{results.map(r => (
-            <div key={r.symbol} className="search-result-item" onClick={()=>{onSelect(r.symbol,r.description);setQuery("");setShow(false)}}>
-              <div><span className="symbol">{r.symbol}</span><div className="name">{r.description}</div></div>
-              <span className="result-arrow">{"\u203A"}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input placeholder={t('dash.searchPlaceholder')} value={query}
+            onChange={e => handleChange(e.target.value)}
+            onFocus={() => results.length && setShow(true)}
+            onBlur={() => setTimeout(() => setShow(false), 200)} />
+          {show && (
+            <div className="search-results">
+              {results.map(r => (
+                <div key={r.symbol} className="search-result-item"
+                  onClick={() => { onSelect(r.symbol, r.description); setQuery(""); setShow(false); }}>
+                  <div>
+                    <span className="symbol">{r.symbol}</span>
+                    <div className="name">{r.description}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}</div>}
+          )}
         </div>
       );
     }
@@ -1650,6 +1775,7 @@
     function TradePanel({ symbol, quote }) {
       const { portfolio, history, executeTrade } = useContext(PortfolioContext);
       const addToast = useContext(ToastContext);
+      const { t } = useI18n();
       const [side, setSide] = useState("buy");
       const [shares, setShares] = useState("");
       const [eduPopup, setEduPopup] = useState(null);
@@ -1657,58 +1783,85 @@
 
       if (!symbol || !quote) return (
         <div className="card">
-          <div className="card-header"><h3>Trade</h3></div>
+          <div className="card-header"><h3>{t('trade.title')}</h3></div>
           <div className="card-body">
             <div className="empty-state">
-              <span className="empty-icon">{"\uD83D\uDD0D"}</span>
-              <h4>No Stock Selected</h4>
-              <p>Search for a stock or pick one from your watchlist to start trading</p>
+              <div className="emoji">{"\uD83D\uDD0D"}</div>
+              <p>{t('trade.noStockDesc')}</p>
             </div>
           </div>
         </div>
       );
+
       const price = quote.c || 0;
       const numShares = parseInt(shares) || 0;
       const total = numShares * price;
       const position = portfolio.positions[symbol];
-      const maxBuy = Math.floor(portfolio.cash / price);
-      const maxSell = position?.shares || 0;
+      const maxBuyShares = Math.floor(portfolio.cash / price);
+      const maxSellShares = position?.shares || 0;
 
       const handleTrade = () => {
-        if (numShares <= 0) return addToast("Enter a valid number of shares", "error");
-        if (side === "buy" && total > portfolio.cash) return addToast("Insufficient funds", "error");
-        if (side === "sell" && numShares > maxSell) return addToast("You don't own enough shares", "error");
+        if (numShares <= 0) return addToast(t('trade.enterShares'), "error");
+        if (side === "buy" && total > portfolio.cash) return addToast(t('trade.insufficientFunds'), "error");
+        if (side === "sell" && numShares > maxSellShares) return addToast(t('trade.notEnoughShares'), "error");
+
         const trade = { symbol, shares: numShares, price, side };
         const rules = checkEducationalRules(portfolio, trade, history, quote);
-        if (rules.length > 0) { setEduPopup(rules[0]); setPendingTrade(trade); return; }
-        finalize(trade);
+        if (rules.length > 0) {
+          setEduPopup(rules[0]);
+          setPendingTrade(trade);
+          return;
+        }
+        finalizeTrade(trade);
       };
-      const finalize = t => {
-        executeTrade(t.symbol, t.shares, t.price, t.side);
-        addToast(`${t.side==="buy"?"Bought":"Sold"} ${t.shares} shares of ${t.symbol} at ${fmt(t.price)}`, "success");
-        setShares(""); setEduPopup(null); setPendingTrade(null);
+
+      const finalizeTrade = (trade) => {
+        executeTrade(trade.symbol, trade.shares, trade.price, trade.side);
+        addToast(`${trade.side === "buy" ? t('trade.bought') : t('trade.sold')} ${trade.shares} ${t('trade.sharesOf')} ${trade.symbol} ${t('trade.at')} ${formatMoney(trade.price)}`, "success");
+        setShares("");
+        setEduPopup(null);
+        setPendingTrade(null);
       };
-      const setMax = () => setShares(String(side==="buy"?maxBuy:maxSell));
 
       return (
         <div className="card">
           <div className="trade-tabs">
-            <button className={`trade-tab ${side==="buy"?"active-buy":""}`} onClick={()=>setSide("buy")}>Buy</button>
-            <button className={`trade-tab ${side==="sell"?"active-sell":""}`} onClick={()=>setSide("sell")}>Sell</button>
+            <button className={`trade-tab ${side === "buy" ? "active-buy" : ""}`} onClick={() => setSide("buy")}>{t('trade.buy')}</button>
+            <button className={`trade-tab ${side === "sell" ? "active-sell" : ""}`} onClick={() => setSide("sell")}>{t('trade.sell')}</button>
           </div>
           <div className="trade-form">
-            <div className="trade-row"><label>Symbol</label><strong style={{fontSize:16}}>{symbol}</strong></div>
-            <div className="trade-row"><label>Market Price</label><span style={{fontWeight:700,fontSize:16}}>{fmt(price)}</span></div>
-            <div className="trade-row"><label>Shares</label><input className="trade-input" type="number" min="1" max={side==="buy"?maxBuy:maxSell} value={shares} onChange={e=>setShares(e.target.value)} placeholder="0" /></div>
-            <div className="trade-max">Max: <span onClick={setMax}>{side==="buy"?maxBuy:maxSell} shares</span></div>
-            <div className="trade-summary">
-              <div className="trade-summary-row"><span>Estimated Total</span><span>{fmt(total)}</span></div>
-              <div className="trade-summary-row"><span>Cash Available</span><span>{fmt(portfolio.cash)}</span></div>
-              <div className="trade-summary-row"><span>{side==="buy"?"Remaining Cash":"Cash After Sale"}</span><span>{fmt(side==="buy"?portfolio.cash-total:portfolio.cash+total)}</span></div>
+            <div className="trade-row">
+              <label>{t('trade.symbol')}</label>
+              <strong>{symbol}</strong>
             </div>
-            <button className={`btn ${side==="buy"?"btn-buy":"btn-sell"}`} onClick={handleTrade}>{side==="buy"?`Buy ${symbol}`:`Sell ${symbol}`}</button>
+            <div className="trade-row">
+              <label>{t('trade.marketPrice')}</label>
+              <span>{formatMoney(price)}</span>
+            </div>
+            <div className="trade-row">
+              <label>{t('trade.shares')}</label>
+              <input className="trade-input" type="number" min="1"
+                max={side === "buy" ? maxBuyShares : maxSellShares}
+                value={shares} onChange={e => setShares(e.target.value)}
+                placeholder="0" />
+            </div>
+            <div style={{textAlign:'right',fontSize:12,color:'var(--text-dim)',marginBottom:8}}>
+              {t('trade.max')}: {side === "buy" ? maxBuyShares : maxSellShares}
+            </div>
+            <div className="trade-summary">
+              <div className="trade-summary-row"><span>{t('trade.estimatedTotal')}</span><span>{formatMoney(total)}</span></div>
+              <div className="trade-summary-row"><span>{t('trade.cashAvailable')}</span><span>{formatMoney(portfolio.cash)}</span></div>
+              {side === "buy" && <div className="trade-summary-row"><span>{t('trade.remainingCash')}</span><span>{formatMoney(portfolio.cash - total)}</span></div>}
+            </div>
+            <button className={`btn ${side === "buy" ? "btn-buy" : "btn-sell"}`} onClick={handleTrade}>
+              {side === "buy" ? `${t('trade.buy')} ${symbol}` : `${t('trade.sell')} ${symbol}`}
+            </button>
           </div>
-          {eduPopup && <EducationalPopup rule={eduPopup} onClose={()=>{setEduPopup(null);setPendingTrade(null)}} onProceed={()=>finalize(pendingTrade)} />}
+          {eduPopup && (
+            <EducationalPopup rule={eduPopup}
+              onClose={() => { setEduPopup(null); setPendingTrade(null); }}
+              onProceed={() => finalizeTrade(pendingTrade)} />
+          )}
         </div>
       );
     }
@@ -1716,52 +1869,72 @@
     // ═══════════════════════════════════════════════════════
     // WATCHLIST
     // ═══════════════════════════════════════════════════════
-    function Watchlist({ onSelect }) {
+    function Watchlist({ onSelect, activeSymbol }) {
+      const { t } = useI18n();
       const [items, setItems] = useState(() => {
-        const s = localStorage.getItem("watchlist");
-        return s ? JSON.parse(s) : [
-          {symbol:"AAPL",name:"Apple Inc"},{symbol:"MSFT",name:"Microsoft"},{symbol:"GOOGL",name:"Alphabet"},{symbol:"TSLA",name:"Tesla"},{symbol:"AMZN",name:"Amazon"}
+        const saved = localStorage.getItem("watchlist");
+        return saved ? JSON.parse(saved) : [
+          { symbol: "AAPL", name: "Apple Inc" },
+          { symbol: "MSFT", name: "Microsoft" },
+          { symbol: "GOOGL", name: "Alphabet" },
+          { symbol: "TSLA", name: "Tesla" },
+          { symbol: "AMZN", name: "Amazon" },
         ];
       });
       const [quotes, setQuotes] = useState({});
-      const [addSym, setAddSym] = useState("");
+      const [addSymbol, setAddSymbol] = useState("");
 
       useEffect(() => {
         localStorage.setItem("watchlist", JSON.stringify(items));
-        items.forEach(async item => { const q = await getQuote(item.symbol); if (q) setQuotes(prev => ({...prev, [item.symbol]: q})); });
+        items.forEach(async (item) => {
+          const q = await getQuote(item.symbol);
+          if (q) setQuotes(prev => ({ ...prev, [item.symbol]: q }));
+        });
       }, [items]);
 
       const handleAdd = async () => {
-        const sym = addSym.toUpperCase().trim();
-        if (!sym || items.find(i=>i.symbol===sym)) return;
+        const sym = addSymbol.toUpperCase().trim();
+        if (!sym || items.find(i => i.symbol === sym)) return;
         const results = await searchSymbols(sym);
-        const match = results.find(r=>r.symbol===sym) || results[0];
-        setItems(prev => [...prev, { symbol: match?match.symbol:sym, name: match?match.description:sym }]);
-        setAddSym("");
+        const match = results.find(r => r.symbol === sym) || results[0];
+        if (match) {
+          setItems(prev => [...prev, { symbol: match.symbol, name: match.description }]);
+        } else {
+          setItems(prev => [...prev, { symbol: sym, name: sym }]);
+        }
+        setAddSymbol("");
+      };
+
+      const handleRemove = (sym) => {
+        setItems(prev => prev.filter(i => i.symbol !== sym));
       };
 
       return (
         <div className="card">
-          <div className="card-header"><h3>Watchlist</h3><span style={{fontSize:12,color:'var(--text-muted)'}}>{items.length} stocks</span></div>
+          <div className="card-header"><h3>{t('watch.title')}</h3></div>
           <div className="card-body">
             {items.map(item => {
               const q = quotes[item.symbol];
-              const change = q ? (q.dp || ((q.c-q.pc)/q.pc*100)) : 0;
+              const change = q ? (q.dp || ((q.c - q.pc) / q.pc * 100)) : 0;
               return (
-                <div key={item.symbol} className="watchlist-item" onClick={()=>onSelect(item.symbol,item.name)}>
-                  <div className="watchlist-left">
-                    <div className="watchlist-avatar">{item.symbol.slice(0,2)}</div>
-                    <div><div className="watchlist-ticker">{item.symbol}</div><div className="watchlist-name">{item.name}</div></div>
+                <div key={item.symbol} className="watchlist-item" onClick={() => onSelect(item.symbol, item.name)}>
+                  <div>
+                    <div className="watchlist-ticker">{item.symbol}</div>
+                    <div className="watchlist-name">{item.name}</div>
                   </div>
                   <div className="watchlist-price">
-                    <div className="price">{q?fmt(q.c):"..."}</div>
-                    <div className={`change ${change>=0?'pnl-positive':'pnl-negative'}`}>{fmtPct(change)}</div>
+                    <div className="price">{q ? formatMoney(q.c) : "..."}</div>
+                    <div className={`change ${change >= 0 ? 'pnl-positive' : 'pnl-negative'}`}>
+                      {formatPct(change)}
+                    </div>
                   </div>
                 </div>
               );
             })}
             <div className="watchlist-add">
-              <input placeholder="Add symbol..." value={addSym} onChange={e=>setAddSym(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAdd()} />
+              <input placeholder={t('watch.addPlaceholder')} value={addSymbol}
+                onChange={e => setAddSymbol(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleAdd()} />
               <button className="btn btn-outline btn-sm" onClick={handleAdd}>+</button>
             </div>
           </div>
@@ -1772,51 +1945,140 @@
     // ═══════════════════════════════════════════════════════
     // DASHBOARD PAGE
     // ═══════════════════════════════════════════════════════
+    function StockDetails({ quote, profile, candles }) {
+      const { t } = useI18n();
+      if (!quote) return null;
+      const volume = candles && candles.length ? candles[candles.length-1].volume : null;
+      const mc = profile?.marketCapitalization ? profile.marketCapitalization * 1e6 : null;
+      let high52 = null, low52 = null;
+      if (candles && candles.length) {
+        high52 = candles.reduce((m,c) => Math.max(m,c.high), candles[0].high);
+        low52 = candles.reduce((m,c) => Math.min(m,c.low), candles[0].low);
+      }
+      return (
+        <div style={{marginTop:16,display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))',gap:12,fontSize:12,color:'var(--text-dim)'}}>
+          <div style={{background:'var(--surface2)',borderRadius:8,padding:10}}>
+            <div>{t('stock.open')}</div><div style={{marginTop:4,color:'var(--text)'}}>{formatMoney(quote.o || quote.c)}</div>
+          </div>
+          <div style={{background:'var(--surface2)',borderRadius:8,padding:10}}>
+            <div>{t('stock.high')}</div><div style={{marginTop:4,color:'var(--text)'}}>{formatMoney(quote.h || quote.c)}</div>
+          </div>
+          <div style={{background:'var(--surface2)',borderRadius:8,padding:10}}>
+            <div>{t('stock.low')}</div><div style={{marginTop:4,color:'var(--text)'}}>{formatMoney(quote.l || quote.c)}</div>
+          </div>
+          <div style={{background:'var(--surface2)',borderRadius:8,padding:10}}>
+            <div>{t('stock.prevClose')}</div><div style={{marginTop:4,color:'var(--text)'}}>{formatMoney(quote.pc || quote.c)}</div>
+          </div>
+          <div style={{background:'var(--surface2)',borderRadius:8,padding:10}}>
+            <div>{t('stock.volume')}</div><div style={{marginTop:4,color:'var(--text)'}}>{volume != null ? formatNum(volume) : '-'}</div>
+          </div>
+          <div style={{background:'var(--surface2)',borderRadius:8,padding:10}}>
+            <div>{t('stock.marketCap')}</div><div style={{marginTop:4,color:'var(--text)'}}>{mc ? '$'+formatNum(mc) : '-'}</div>
+          </div>
+          <div style={{background:'var(--surface2)',borderRadius:8,padding:10}}>
+            <div>{t('stock.industry')}</div><div style={{marginTop:4,color:'var(--text)'}}>{profile?.finnhubIndustry || '-'}</div>
+          </div>
+          {high52 != null && low52 != null && (
+            <div style={{background:'var(--surface2)',borderRadius:8,padding:10}}>
+              <div>52W</div><div style={{marginTop:4,color:'var(--text)'}}>{formatMoney(low52)} - {formatMoney(high52)}</div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function timeAgoStr(ts, t) {
+      const diff = Math.floor((Date.now()/1000 - ts));
+      const m = Math.floor(diff/60), h = Math.floor(m/60), d = Math.floor(h/24);
+      if (diff < 60) return t('time.ago.now');
+      if (h < 1) return t('time.ago.minutes',{n:m});
+      if (d < 1) return t('time.ago.hours',{n:h});
+      return t('time.ago.days',{n:d});
+    }
+
+    function StockNews({ news }) {
+      const { t } = useI18n();
+      return (
+        <div className="card" style={{marginTop:16}}>
+          <div className="card-header"><h3>{t('stock.news')}</h3></div>
+          <div className="card-body">
+            {!news || news.length === 0 ? (
+              <div className="empty-state" style={{padding:20}}>
+                <p>{t('stock.noNews')}</p>
+              </div>
+            ) : news.slice(0,5).map(n => (
+              <div key={n.id || n.datetime} style={{padding:'8px 0',borderBottom:'1px solid var(--border)',fontSize:13}}>
+                <a href={n.url} target="_blank" rel="noopener noreferrer" style={{color:'var(--text)',textDecoration:'none'}}>
+                  <div style={{fontWeight:500,marginBottom:4}}>{n.headline}</div>
+                </a>
+                <div style={{display:'flex',justifyContent:'space-between',color:'var(--text-dim)',fontSize:11}}>
+                  <span>{n.source}</span>
+                  <span>{timeAgoStr(n.datetime, t)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     function DashboardPage() {
       const { portfolio, history, updatePrice } = useContext(PortfolioContext);
-      const [sym, setSym] = useState(null);
-      const [name, setName] = useState("");
+      const { t } = useI18n();
+      const [selectedSymbol, setSelectedSymbol] = useState(null);
+      const [selectedName, setSelectedName] = useState("");
       const [quote, setQuote] = useState(null);
+      const [profile, setProfile] = useState(null);
+      const [news, setNews] = useState([]);
+      const [candles, setCandles] = useState(null);
 
-      const handleSelect = async (s, n) => {
-        setSym(s); setName(n||s);
-        const q = await getQuote(s);
+      const handleSelect = async (symbol, name) => {
+        setSelectedSymbol(symbol);
+        setSelectedName(name || symbol);
+        const [q, p, n] = await Promise.all([
+          getQuote(symbol),
+          getCompanyProfile(symbol),
+          getCompanyNews(symbol)
+        ]);
         setQuote(q);
-        if (q && portfolio.positions[s]) updatePrice(s, q.c);
+        setProfile(p);
+        setNews(n || []);
+        if (q && portfolio.positions[symbol]) {
+          updatePrice(symbol, q.c);
+        }
       };
 
-      const totalPos = Object.values(portfolio.positions).reduce((s,p)=>s+p.shares*p.currentPrice,0);
-      const totalVal = portfolio.cash + totalPos;
-      const pnl = totalVal - STARTING_CASH;
-      const pnlPct = ((totalVal/STARTING_CASH)-1)*100;
+      const totalPositionValue = Object.values(portfolio.positions).reduce((s, p) => s + p.shares * p.currentPrice, 0);
+      const totalValue = portfolio.cash + totalPositionValue;
+      const totalPnL = totalValue - STARTING_CASH;
+      const totalPnLPct = ((totalValue / STARTING_CASH) - 1) * 100;
 
       return (
-        <div className="page-enter">
-          <div className="page-header">
-            <h2>Dashboard</h2>
-            <div className="search-wrapper" style={{width:380}}><SearchBar onSelect={handleSelect} /></div>
+        <div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+            <h2>{t('dash.title')}</h2>
+            <div style={{width:360}}><SearchBar onSelect={handleSelect} /></div>
           </div>
 
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-label">Portfolio Value</div>
-              <div className="stat-value">{fmt(totalVal)}</div>
-              <div className={`stat-change ${pnl>=0?'up':'down'}`}>{pnl>=0?Icon.arrowUp:Icon.arrowDown} {fmtPct(pnlPct)}</div>
+              <div className="stat-label">{t('dash.portfolioValue')}</div>
+              <div className="stat-value">{formatMoney(totalValue)}</div>
+              <div className={`stat-change ${totalPnL >= 0 ? 'up' : 'down'}`}>
+                {formatPct(totalPnLPct)} ({formatMoney(totalPnL)})
+              </div>
             </div>
             <div className="stat-card">
-              <div className="stat-label">Cash Available</div>
-              <div className="stat-value">{fmt(portfolio.cash)}</div>
-              <div style={{fontSize:12,color:'var(--text-muted)',marginTop:6}}>{((portfolio.cash/totalVal)*100).toFixed(0)}% of portfolio</div>
+              <div className="stat-label">{t('dash.cashAvailable')}</div>
+              <div className="stat-value">{formatMoney(portfolio.cash)}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-label">Invested</div>
-              <div className="stat-value">{fmt(totalPos)}</div>
-              <div style={{fontSize:12,color:'var(--text-muted)',marginTop:6}}>{Object.keys(portfolio.positions).length} positions</div>
+              <div className="stat-label">{t('dash.invested')}</div>
+              <div className="stat-value">{formatMoney(totalPositionValue)}</div>
             </div>
             <div className="stat-card">
-              <div className="stat-label">Total Trades</div>
+              <div className="stat-label">{t('dash.totalTrades')}</div>
               <div className="stat-value">{history.length}</div>
-              <div style={{fontSize:12,color:'var(--text-muted)',marginTop:6}}>{history.filter(h=>h.side==='buy').length} buys, {history.filter(h=>h.side==='sell').length} sells</div>
             </div>
           </div>
 
@@ -1824,27 +2086,39 @@
             <div>
               <div className="card" style={{marginBottom:20}}>
                 <div className="card-header">
-                  <h3>{sym ? `${sym} \u2014 ${name}` : "Select a Stock"}</h3>
+                  {selectedSymbol ? (
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      {profile?.logo && <img src={profile.logo} alt={selectedSymbol} style={{width:28,height:28,borderRadius:'50%',objectFit:'cover'}} />}
+                      <div>
+                        <div style={{fontWeight:600,fontSize:15}}>{profile?.name || selectedSymbol}</div>
+                        <div style={{fontSize:11,color:'var(--text-dim)'}}>{selectedSymbol} • {profile?.exchange || ''}</div>
+                      </div>
+                    </div>
+                  ) : <h3>{t('dash.selectStock')}</h3>}
                   {quote && (
-                    <div style={{display:'flex',alignItems:'center',gap:14}}>
-                      <span style={{fontSize:22,fontWeight:800}}>{fmt(quote.c)}</span>
-                      <span className={`pnl-badge ${(quote.dp||0)>=0?'positive':'negative'}`}>{fmtPct(quote.dp||0)}</span>
+                    <div style={{display:'flex',alignItems:'center',gap:12}}>
+                      <span style={{fontSize:20,fontWeight:700}}>{formatMoney(quote.c)}</span>
+                      <span className={quote.dp >= 0 ? 'pnl-positive' : 'pnl-negative'} style={{fontSize:14}}>
+                        {formatPct(quote.dp || 0)}
+                      </span>
                     </div>
                   )}
                 </div>
                 <div className="card-body">
-                  {sym ? <StockChart symbol={sym} /> : (
-                    <div className="empty-state">
-                      <span className="empty-icon">{"\uD83D\uDCC8"}</span>
-                      <h4>Ready to Trade</h4>
-                      <p>Search for a stock above or click one from your watchlist to get started</p>
-                    </div>
-                  )}
+                  {selectedSymbol ? (
+                    <>
+                      <StockChart symbol={selectedSymbol} onCandles={setCandles} />
+                      <StockDetails quote={quote} profile={profile} candles={candles} />
+                    </>
+                  ) : <div className="empty-state"><div className="emoji">{"\uD83D\uDCC8"}</div><p>{t('dash.readyDesc')}</p></div>}
                 </div>
               </div>
-              <Watchlist onSelect={handleSelect} />
+              <StockNews news={news} />
+              <Watchlist onSelect={handleSelect} activeSymbol={selectedSymbol} />
             </div>
-            <div><TradePanel symbol={sym} quote={quote} /></div>
+            <div>
+              <TradePanel symbol={selectedSymbol} quote={quote} />
+            </div>
           </div>
         </div>
       );
@@ -1856,48 +2130,62 @@
     function PortfolioPage() {
       const { portfolio, history, resetPortfolio } = useContext(PortfolioContext);
       const addToast = useContext(ToastContext);
+      const { t } = useI18n();
       const positions = Object.entries(portfolio.positions);
-      const totalPos = positions.reduce((s,[,p])=>s+p.shares*p.currentPrice,0);
-      const totalVal = portfolio.cash + totalPos;
+      const totalPositionValue = positions.reduce((s, [, p]) => s + p.shares * p.currentPrice, 0);
+      const totalValue = portfolio.cash + totalPositionValue;
 
       return (
-        <div className="page-enter">
-          <div className="page-header">
-            <h2>Portfolio</h2>
-            <button className="btn btn-outline btn-sm" onClick={()=>{resetPortfolio();addToast("Portfolio reset to $100,000","info")}}>Reset Portfolio</button>
+        <div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+            <h2>{t('portfolio.title')}</h2>
+            <button className="btn btn-outline btn-sm" onClick={() => { resetPortfolio(); addToast(t('portfolio.resetMsg'), "info"); }}>
+              {t('portfolio.reset')}
+            </button>
           </div>
 
           <div className="stats-grid">
-            <div className="stat-card"><div className="stat-label">Total Value</div><div className="stat-value">{fmt(totalVal)}</div></div>
-            <div className="stat-card"><div className="stat-label">Cash</div><div className="stat-value">{fmt(portfolio.cash)}</div></div>
-            <div className="stat-card"><div className="stat-label">Invested</div><div className="stat-value">{fmt(totalPos)}</div></div>
             <div className="stat-card">
-              <div className="stat-label">Total P&L</div>
-              <div className="stat-value" style={{color:totalVal>=STARTING_CASH?'var(--green)':'var(--red)'}}>{fmt(totalVal-STARTING_CASH)}</div>
+              <div className="stat-label">{t('portfolio.totalValue')}</div>
+              <div className="stat-value">{formatMoney(totalValue)}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">{t('portfolio.cash')}</div>
+              <div className="stat-value">{formatMoney(portfolio.cash)}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">{t('portfolio.invested')}</div>
+              <div className="stat-value">{formatMoney(totalPositionValue)}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">{t('portfolio.totalPnl')}</div>
+              <div className="stat-value" style={{color: totalValue >= STARTING_CASH ? 'var(--green)' : 'var(--red)'}}>
+                {formatMoney(totalValue - STARTING_CASH)}
+              </div>
             </div>
           </div>
 
           <div className="card" style={{marginBottom:20}}>
-            <div className="card-header"><h3>Open Positions</h3><span style={{fontSize:12,color:'var(--text-muted)'}}>{positions.length} stocks</span></div>
+            <div className="card-header"><h3>{t('portfolio.openPositions')}</h3></div>
             <div className="card-body" style={{padding:0,overflowX:'auto'}}>
               {positions.length === 0 ? (
-                <div className="empty-state"><span className="empty-icon">{"\uD83D\uDCBC"}</span><h4>No Open Positions</h4><p>Head to the Dashboard to make your first trade!</p></div>
+                <div className="empty-state"><div className="emoji">{"\uD83D\uDCBC"}</div><p>{t('portfolio.noPositionsDesc')}</p></div>
               ) : (
                 <table className="positions-table">
-                  <thead><tr><th>Symbol</th><th>Shares</th><th>Avg Cost</th><th>Current</th><th>Value</th><th>P&L</th><th>Return</th></tr></thead>
+                  <thead><tr><th>{t('portfolio.symbol')}</th><th>{t('portfolio.shares')}</th><th>{t('portfolio.avgCost')}</th><th>{t('portfolio.current')}</th><th>{t('portfolio.value')}</th><th>{t('portfolio.pnl')}</th><th>{t('portfolio.return')}</th></tr></thead>
                   <tbody>
                     {positions.map(([sym, pos]) => {
-                      const pnl = (pos.currentPrice-pos.avgCost)*pos.shares;
-                      const pnlPct = ((pos.currentPrice/pos.avgCost)-1)*100;
+                      const pnl = (pos.currentPrice - pos.avgCost) * pos.shares;
+                      const pnlPct = ((pos.currentPrice / pos.avgCost) - 1) * 100;
                       return (
                         <tr key={sym}>
-                          <td><div className="ticker"><div className="ticker-badge">{sym.slice(0,2)}</div>{sym}</div></td>
+                          <td className="ticker">{sym}</td>
                           <td>{pos.shares}</td>
-                          <td>{fmt(pos.avgCost)}</td>
-                          <td style={{fontWeight:600}}>{fmt(pos.currentPrice)}</td>
-                          <td style={{fontWeight:600}}>{fmt(pos.shares*pos.currentPrice)}</td>
-                          <td className={pnl>=0?'pnl-positive':'pnl-negative'} style={{fontWeight:600}}>{fmt(pnl)}</td>
-                          <td><span className={`pnl-badge ${pnlPct>=0?'positive':'negative'}`}>{fmtPct(pnlPct)}</span></td>
+                          <td>{formatMoney(pos.avgCost)}</td>
+                          <td>{formatMoney(pos.currentPrice)}</td>
+                          <td>{formatMoney(pos.shares * pos.currentPrice)}</td>
+                          <td className={pnl >= 0 ? 'pnl-positive' : 'pnl-negative'}>{formatMoney(pnl)}</td>
+                          <td className={pnlPct >= 0 ? 'pnl-positive' : 'pnl-negative'}>{formatPct(pnlPct)}</td>
                         </tr>
                       );
                     })}
@@ -1908,19 +2196,21 @@
           </div>
 
           <div className="card">
-            <div className="card-header"><h3>Trade History</h3><span style={{fontSize:12,color:'var(--text-muted)'}}>{history.length} trades</span></div>
+            <div className="card-header"><h3>{t('portfolio.tradeHistory')}</h3></div>
             <div className="card-body">
               {history.length === 0 ? (
-                <div className="empty-state"><span className="empty-icon">{"\uD83D\uDCDD"}</span><h4>No Trades Yet</h4><p>Your trade history will appear here</p></div>
+                <div className="empty-state"><p>{t('portfolio.noTradesDesc')}</p></div>
               ) : (
-                [...history].reverse().slice(0,50).map((h,i) => (
+                [...history].reverse().slice(0, 50).map((h, i) => (
                   <div key={i} className="history-item">
-                    <div style={{display:'flex',alignItems:'center',gap:12}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
                       <span className={`history-badge ${h.side}`}>{h.side}</span>
                       <strong>{h.symbol}</strong>
-                      <span style={{color:'var(--text-muted)'}}>{h.shares} shares @ {fmt(h.price)}</span>
+                      <span style={{color:'var(--text-dim)'}}>{h.shares} shares @ {formatMoney(h.price)}</span>
                     </div>
-                    <div style={{color:'var(--text-muted)',fontSize:12,fontWeight:500}}>{new Date(h.timestamp).toLocaleString()}</div>
+                    <div style={{color:'var(--text-dim)',fontSize:12}}>
+                      {new Date(h.timestamp).toLocaleString()}
+                    </div>
                   </div>
                 ))
               )}
@@ -1933,48 +2223,115 @@
     // ═══════════════════════════════════════════════════════
     // LEARN PAGE
     // ═══════════════════════════════════════════════════════
-    function LearnPage() {
-      const [active, setActive] = useState(null);
-      const lessons = [
-        { icon:"\uD83C\uDF31", title:"What is the Stock Market?", level:"beginner", content:"The stock market is a marketplace where shares of publicly traded companies are bought and sold. When you buy a share, you own a tiny piece of that company. The price of a share is determined by supply and demand \u2014 if more people want to buy than sell, the price goes up, and vice versa.\n\nKey exchanges include the NYSE (New York Stock Exchange) and NASDAQ. Companies list their shares on these exchanges through an IPO (Initial Public Offering)." },
-        { icon:"\uD83D\uDCB0", title:"Types of Orders", level:"beginner", content:"Market Order: Buys/sells immediately at the current price. Fast execution but you might not get the exact price you see.\n\nLimit Order: Sets a maximum buy price or minimum sell price. Guarantees your price but might not execute if the market doesn't reach your level.\n\nStop-Loss Order: Automatically sells when a stock drops to a certain price. Essential for managing risk.\n\nStop-Limit Order: Combines stop-loss and limit order features. Activates at one price, executes at another." },
-        { icon:"\u26A0\uFE0F", title:"Pattern Day Trader Rule", level:"beginner", content:"The PDT rule is a FINRA regulation that applies to margin accounts. If you make 4 or more day trades (buy and sell the same stock on the same day) within 5 business days, and these trades represent more than 6% of your total trading activity, your account gets flagged.\n\nOnce flagged, you need to maintain at least $25,000 in your account to continue day trading. If your balance drops below $25k, you'll be restricted to closing trades only for 90 days.\n\nStrategies to manage this: Hold positions overnight, use a cash account (no PDT but slower settlement), or ensure your balance stays above $25k." },
-        { icon:"\uD83D\uDEE1\uFE0F", title:"Risk Management", level:"intermediate", content:"The 1% Rule: Never risk more than 1% of your total portfolio on a single trade. With a $100k account, your maximum loss per trade should be $1,000.\n\nPosition Sizing: Calculate your position size based on your stop-loss distance and risk tolerance. Position Size = Risk Amount / (Entry Price - Stop-Loss Price).\n\nDiversification: Don't put all your eggs in one basket. Spread across different sectors (tech, healthcare, energy, etc.) and asset types.\n\nRisk/Reward Ratio: Aim for at least 2:1 \u2014 your potential profit should be at least twice your potential loss." },
-        { icon:"\uD83D\uDCC8", title:"Technical Analysis Basics", level:"intermediate", content:"Support & Resistance: Price levels where stocks tend to reverse. Support is a floor (buying pressure), resistance is a ceiling (selling pressure).\n\nMoving Averages: The 50-day and 200-day SMAs are key levels. \u2018Golden Cross\u2019 (50 crosses above 200) = bullish. \u2018Death Cross\u2019 = bearish.\n\nRSI (0-100): Above 70 = overbought (may drop). Below 30 = oversold (may rise). Best in range-bound markets.\n\nMACD: Shows trend momentum. Signal line crossovers indicate potential buy/sell opportunities.\n\nVolume: Confirms price moves. High volume = strong conviction. Low volume = weak, potentially reversible." },
-        { icon:"\uD83E\uDDE0", title:"Trading Psychology", level:"intermediate", content:"FOMO (Fear Of Missing Out): The urge to buy a stock because it's going up. This often leads to buying at the top. Stick to your plan.\n\nLoss Aversion: People feel losses twice as strongly as gains. This leads to holding losers too long and selling winners too quickly.\n\nConfirmation Bias: Seeking information that supports your position while ignoring contradictory evidence. Always consider the bear case.\n\nRevenge Trading: Making impulsive trades to recover losses. Take a break after a losing streak.\n\nOvertrading: Making too many trades chasing action. Quality over quantity. The best traders often wait patiently for ideal setups." },
-        { icon:"\uD83D\uDCC5", title:"Day Trading Strategies", level:"advanced", content:"Scalping: Making dozens of trades per day for tiny profits. Requires very tight spreads, fast execution, and discipline.\n\nMomentum Trading: Riding stocks with significant volume and price movement. Look for catalysts (earnings, news) that drive sharp moves.\n\nBreakout Trading: Entering when price breaks above resistance or below support on high volume. Key: wait for confirmation before entering.\n\nReversal Trading: Betting that an overextended move will reverse. Higher risk but can be very profitable. Use RSI and candlestick patterns.\n\nGap Trading: Trading stocks that open significantly higher or lower than the previous close." },
-        { icon:"\uD83D\uDCCA", title:"Reading Financial Statements", level:"advanced", content:"Income Statement: Revenue, expenses, and profit. Look for consistent revenue growth and improving margins. EPS (Earnings Per Share) is key.\n\nBalance Sheet: Assets, liabilities, and equity. Check debt-to-equity ratio. High debt can be risky during downturns.\n\nCash Flow Statement: How cash moves in/out. Free Cash Flow (FCF) is arguably the most important metric \u2014 it's harder to manipulate than earnings.\n\nP/E Ratio: Price divided by earnings. Compare to industry averages. High P/E may mean overvalued or high growth expectations.\n\nPEG Ratio: P/E divided by growth rate. PEG of 1 = fairly valued. Below 1 = potentially undervalued." },
-      ];
+    const LESSONS_EN = [
+      {
+        icon: "\uD83C\uDF31", title: "What is the Stock Market?", level: "beginner",
+        content: "The stock market is a marketplace where shares of publicly traded companies are bought and sold. When you buy a share, you own a tiny piece of that company. The price of a share is determined by supply and demand — if more people want to buy than sell, the price goes up, and vice versa.\n\nKey exchanges include the NYSE (New York Stock Exchange) and NASDAQ. Companies list their shares on these exchanges through an IPO (Initial Public Offering)."
+      },
+      {
+        icon: "\uD83D\uDCB0", title: "Types of Orders", level: "beginner",
+        content: "Market Order: Buys/sells immediately at the current price. Fast execution but you might not get the exact price you see.\n\nLimit Order: Sets a maximum buy price or minimum sell price. Guarantees your price but might not execute if the market doesn't reach your level.\n\nStop-Loss Order: Automatically sells when a stock drops to a certain price. Essential for managing risk.\n\nStop-Limit Order: Combines stop-loss and limit order features. Activates at one price, executes at another."
+      },
+      {
+        icon: "\u26A0\uFE0F", title: "Pattern Day Trader Rule", level: "beginner",
+        content: "The PDT rule is a FINRA regulation that applies to margin accounts. If you make 4 or more day trades (buy and sell the same stock on the same day) within 5 business days, and these trades represent more than 6% of your total trading activity, your account gets flagged.\n\nOnce flagged, you need to maintain at least $25,000 in your account to continue day trading. If your balance drops below $25k, you'll be restricted to closing trades only for 90 days.\n\nStrategies to manage this: Hold positions overnight, use a cash account (no PDT but slower settlement), or ensure your balance stays above $25k."
+      },
+      {
+        icon: "\uD83D\uDEE1\uFE0F", title: "Risk Management", level: "intermediate",
+        content: "The 1% Rule: Never risk more than 1% of your total portfolio on a single trade. With a $100k account, your maximum loss per trade should be $1,000.\n\nPosition Sizing: Calculate your position size based on your stop-loss distance and risk tolerance. Position Size = Risk Amount / (Entry Price - Stop-Loss Price).\n\nDiversification: Don't put all your eggs in one basket. Spread across different sectors (tech, healthcare, energy, etc.) and asset types.\n\nRisk/Reward Ratio: Aim for at least 2:1 — your potential profit should be at least twice your potential loss."
+      },
+      {
+        icon: "\uD83D\uDCC8", title: "Technical Analysis Basics", level: "intermediate",
+        content: "Support & Resistance: Price levels where stocks tend to reverse. Support is a floor (buying pressure), resistance is a ceiling (selling pressure).\n\nMoving Averages: The 50-day and 200-day SMAs are key levels. 'Golden Cross' (50 crosses above 200) = bullish. 'Death Cross' = bearish.\n\nRSI (0-100): Above 70 = overbought (may drop). Below 30 = oversold (may rise). Best in range-bound markets.\n\nMACD: Shows trend momentum. Signal line crossovers indicate potential buy/sell opportunities.\n\nVolume: Confirms price moves. High volume = strong conviction. Low volume = weak, potentially reversible."
+      },
+      {
+        icon: "\uD83E\uDDE0", title: "Trading Psychology", level: "intermediate",
+        content: "FOMO (Fear Of Missing Out): The urge to buy a stock because it's going up. This often leads to buying at the top. Stick to your plan.\n\nLoss Aversion: People feel losses twice as strongly as gains. This leads to holding losers too long and selling winners too quickly.\n\nConfirmation Bias: Seeking information that supports your position while ignoring contradictory evidence. Always consider the bear case.\n\nRevenge Trading: Making impulsive trades to recover losses. Take a break after a losing streak.\n\nOvertrading: Making too many trades chasing action. Quality over quantity. The best traders often wait patiently for ideal setups."
+      },
+      {
+        icon: "\uD83D\uDCC5", title: "Day Trading Strategies", level: "advanced",
+        content: "Scalping: Making dozens of trades per day for tiny profits. Requires very tight spreads, fast execution, and discipline.\n\nMomentum Trading: Riding stocks with significant volume and price movement. Look for catalysts (earnings, news) that drive sharp moves.\n\nBreakout Trading: Entering when price breaks above resistance or below support on high volume. Key: wait for confirmation before entering.\n\nReversal Trading: Betting that an overextended move will reverse. Higher risk but can be very profitable. Use RSI and candlestick patterns.\n\nGap Trading: Trading stocks that open significantly higher or lower than the previous close. 'Gap and go' vs 'gap fill' strategies."
+      },
+      {
+        icon: "\uD83D\uDCCA", title: "Reading Financial Statements", level: "advanced",
+        content: "Income Statement: Revenue, expenses, and profit. Look for consistent revenue growth and improving margins. EPS (Earnings Per Share) is key.\n\nBalance Sheet: Assets, liabilities, and equity. Check debt-to-equity ratio. High debt can be risky during downturns.\n\nCash Flow Statement: How cash moves in/out. Free Cash Flow (FCF) is arguably the most important metric — it's harder to manipulate than earnings.\n\nP/E Ratio: Price divided by earnings. Compare to industry averages. High P/E may mean overvalued or high growth expectations.\n\nPEG Ratio: P/E divided by growth rate. PEG of 1 = fairly valued. Below 1 = potentially undervalued."
+      },
+    ];
 
-      if (active !== null) {
-        const l = lessons[active];
+    const LESSONS_ES = [
+      {
+        icon: "\uD83C\uDF31", title: "¿Qué es el Mercado de Acciones?", level: "beginner",
+        content: "El mercado de acciones es un lugar donde se compran y venden participaciones de empresas que cotizan en bolsa. Cuando compras una acción, eres dueño de una pequeña parte de esa empresa. El precio se determina por la oferta y la demanda: si más personas quieren comprar que vender, el precio sube, y viceversa.\n\nLas bolsas más conocidas incluyen la NYSE (New York Stock Exchange) y NASDAQ. Las empresas listan sus acciones en estas bolsas a través de una OPI (Oferta Pública Inicial)."
+      },
+      {
+        icon: "\uD83D\uDCB0", title: "Tipos de Órdenes", level: "beginner",
+        content: "Orden de Mercado: Compra o vende inmediatamente al precio actual. Tiene ejecución rápida, pero puede no coincidir exactamente con el precio que ves.\n\nOrden Limitada: Fija un precio máximo para comprar o mínimo para vender. Garantiza tu precio, pero puede que no se ejecute si el mercado no llega a ese nivel.\n\nOrden Stop-Loss: Vende automáticamente cuando una acción cae a un precio determinado. Es esencial para gestionar el riesgo.\n\nOrden Stop-Limit: Combina características de stop-loss y orden limitada. Se activa a un precio y se ejecuta a otro."
+      },
+      {
+        icon: "\u26A0\uFE0F", title: "Regla del Day Trader Patrón (PDT)", level: "beginner",
+        content: "La regla PDT es una regulación de FINRA que aplica a cuentas de margen. Si realizas 4 o más operaciones intradía (comprar y vender la misma acción en el mismo día) en 5 días hábiles, y representan más del 6% de tu actividad, tu cuenta es marcada.\n\nUna vez marcada, debes mantener al menos $25,000 en la cuenta para seguir haciendo day trading. Si tu saldo baja de $25k, quedarás restringido a solo cerrar posiciones por 90 días.\n\nEstrategias: Mantener posiciones de un día para otro, usar una cuenta de efectivo (sin PDT pero con liquidación más lenta) o mantener tu saldo por encima de $25k."
+      },
+      {
+        icon: "\uD83D\uDEE1\uFE0F", title: "Gestión de Riesgo", level: "intermediate",
+        content: "Regla del 1%: Nunca arriesgues más del 1% de tu portafolio en una sola operación. Con una cuenta de $100k, tu pérdida máxima por operación debería ser de $1,000.\n\nTamaño de Posición: Calcula el tamaño según tu stop-loss y tolerancia al riesgo. Tamaño de Posición = Monto en Riesgo / (Precio de Entrada - Precio de Stop).\n\nDiversificación: No pongas todos los huevos en la misma canasta. Diversifica entre distintos sectores (tecnología, salud, energía, etc.) y tipos de activos.\n\nRelación Riesgo/Beneficio: Apunta al menos a 2:1 — tu beneficio potencial debería ser al menos el doble de tu posible pérdida."
+      },
+      {
+        icon: "\uD83D\uDCC8", title: "Fundamentos del Análisis Técnico", level: "intermediate",
+        content: "Soporte y Resistencia: Niveles de precio donde las acciones tienden a girar. El soporte es un suelo (presión compradora) y la resistencia un techo (presión vendedora).\n\nMedias Móviles: Las medias de 50 y 200 días son claves. 'Golden Cross' (la de 50 cruza por encima de la de 200) es alcista. 'Death Cross' es bajista.\n\nRSI (0-100): Por encima de 70 puede indicar sobrecompra; por debajo de 30, sobreventa. Funciona mejor en mercados laterales.\n\nMACD: Muestra el impulso de la tendencia. Cruces de la línea de señal pueden indicar oportunidades de compra/venta.\n\nVolumen: Confirma los movimientos de precio. Alto volumen = convicción fuerte. Bajo volumen = movimientos débiles, más fáciles de revertir."
+      },
+      {
+        icon: "\uD83E\uDDE0", title: "Psicología del Trading", level: "intermediate",
+        content: "FOMO (miedo a perderse la oportunidad): Impulso de comprar una acción solo porque está subiendo. Esto suele llevar a comprar en máximos. Mantente fiel a tu plan.\n\nAversión a la Pérdida: Las personas sienten el dolor de perder el doble de fuerte que la alegría de ganar. Esto lleva a aguantar perdedoras demasiado tiempo y a vender ganadoras muy pronto.\n\nSesgo de Confirmación: Buscar solo información que confirme tu posición e ignorar la contraria. Considera siempre el escenario opuesto.\n\nTrading de Venganza: Operar impulsivamente para recuperar pérdidas. Toma un descanso tras una racha negativa.\n\nSobreoperar: Hacer demasiadas operaciones por buscar acción. Calidad sobre cantidad. Los mejores traders esperan pacientemente configuraciones ideales."
+      },
+      {
+        icon: "\uD83D\uDCC5", title: "Estrategias de Day Trading", level: "advanced",
+        content: "Scalping: Hacer decenas de operaciones al día buscando ganancias muy pequeñas. Requiere spreads muy ajustados, ejecución rápida y mucha disciplina.\n\nTrading de Momentum: Subirse a acciones con fuerte volumen y movimiento de precio. Busca catalizadores (resultados, noticias) que impulsen grandes movimientos.\n\nTrading de Breakout: Entrar cuando el precio rompe resistencias o soportes con alto volumen. Clave: esperar confirmación antes de entrar.\n\nTrading de Reversión: Apostar a que un movimiento extendido se revertirá. Riesgo alto pero potencialmente muy rentable. Usa RSI y patrones de velas.\n\nTrading de Gaps: Operar acciones que abren muy por encima o por debajo del cierre previo. Estrategias de 'gap and go' vs 'gap fill'."
+      },
+      {
+        icon: "\uD83D\uDCCA", title: "Leer Estados Financieros", level: "advanced",
+        content: "Estado de Resultados: Ingresos, gastos y beneficio. Busca crecimiento consistente de ingresos y mejora de márgenes. La utilidad por acción (EPS) es clave.\n\nBalance General: Activos, pasivos y patrimonio. Revisa el ratio deuda/capital. Mucha deuda puede ser peligrosa en recesiones.\n\nEstado de Flujos de Efectivo: Muestra cómo entra y sale el dinero. El flujo de caja libre (FCF) es uno de los indicadores más importantes y difícil de manipular.\n\nRatio P/E: Precio dividido por ganancias. Compáralo con el promedio del sector. P/E alto puede significar sobrevaloración o altas expectativas de crecimiento.\n\nRatio PEG: P/E dividido por la tasa de crecimiento. Un PEG de 1 ≈ valor razonable; por debajo de 1 puede sugerir infravaloración."
+      },
+    ];
+
+    function LearnPage() {
+      const { locale, t } = useI18n();
+      const [activeTopic, setActiveTopic] = useState(null);
+
+      const lessons = locale === 'es' ? LESSONS_ES : LESSONS_EN;
+
+      if (activeTopic !== null) {
+        const lesson = lessons[activeTopic];
         return (
-          <div className="page-enter lesson-detail">
-            <button className="back-btn" onClick={()=>setActive(null)}>{Icon.back} Back to Lessons</button>
+          <div>
+            <button className="btn btn-outline btn-sm" style={{marginBottom:20}} onClick={() => setActiveTopic(null)}>
+              {t('learn.back')}
+            </button>
             <div className="card">
               <div className="card-header">
-                <h3><span style={{marginRight:10}}>{l.icon}</span>{l.title}</h3>
-                <span className={`lesson-tag ${l.level}`}>{l.level}</span>
+                <h3><span style={{marginRight:8}}>{lesson.icon}</span>{lesson.title}</h3>
+                <span className={`lesson-tag ${lesson.level}`}>{lesson.level}</span>
               </div>
-              <div className="card-body">{l.content.split("\n\n").map((p,i) => <p key={i}>{p}</p>)}</div>
+              <div className="card-body">
+                {lesson.content.split("\n\n").map((para, i) => (
+                  <p key={i} style={{marginBottom:16,lineHeight:1.8,fontSize:14}}>{para}</p>
+                ))}
+              </div>
             </div>
           </div>
         );
       }
 
       return (
-        <div className="page-enter">
-          <div className="page-header" style={{flexDirection:'column',alignItems:'flex-start'}}>
-            <h2>Learn to Trade</h2>
-            <p style={{color:'var(--text-dim)',fontSize:14,marginTop:4}}>Build your trading knowledge from the ground up</p>
-          </div>
+        <div>
+          <h2 style={{marginBottom:8}}>{t('learn.title')}</h2>
+          <p style={{color:'var(--text-dim)',marginBottom:24,fontSize:14}}>{t('learn.subtitle')}</p>
           <div className="lesson-grid">
-            {lessons.map((l,i) => (
-              <div key={i} className="lesson-card" onClick={()=>setActive(i)}>
-                <span className="lesson-icon">{l.icon}</span>
-                <h3>{l.title}</h3>
-                <p>{l.content.substring(0,120)}...</p>
-                <span className={`lesson-tag ${l.level}`}>{l.level}</span>
+            {lessons.map((lesson, i) => (
+              <div key={i} className="lesson-card" onClick={() => setActiveTopic(i)}>
+                <div className="lesson-icon">{lesson.icon}</div>
+                <h3>{lesson.title}</h3>
+                <p>{lesson.content.substring(0, 100)}...</p>
+                <span className={`lesson-tag ${lesson.level}`}>{lesson.level}</span>
               </div>
             ))}
           </div>
@@ -1983,68 +2340,73 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // MAIN APP SHELL
+    // SIDEBAR NAV ICONS
+    // ═══════════════════════════════════════════════════════
+    const icons = {
+      dashboard: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>,
+      portfolio: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>,
+      learn: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+      logout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+    };
+
+    // ═══════════════════════════════════════════════════════
+    // MAIN APP
     // ═══════════════════════════════════════════════════════
     function AppShell() {
       const { user, logout } = useContext(AuthContext);
+      const { locale, t, setLanguage } = useI18n();
       const [page, setPage] = useState("dashboard");
-      const [sidebarOpen, setSidebarOpen] = useState(false);
-      const needsConfig = FIREBASE_CONFIG.apiKey==="YOUR_FIREBASE_API_KEY" || FINNHUB_API_KEY==="YOUR_FINNHUB_API_KEY";
 
-      const navigate = p => { setPage(p); setSidebarOpen(false); };
+      const needsConfig = FIREBASE_CONFIG.apiKey === "YOUR_FIREBASE_API_KEY" || FINNHUB_API_KEY === "YOUR_FINNHUB_API_KEY";
 
       return (
         <div className="app-layout">
-          {/* Mobile header */}
-          <div className="mobile-header">
-            <button className="hamburger" onClick={()=>setSidebarOpen(!sidebarOpen)}>{Icon.menu}</button>
-            <div style={{display:'flex',alignItems:'center',gap:8}}>
-              <div style={{width:28,height:28,borderRadius:8,background:'var(--gradient-accent)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}}>{"\uD83D\uDCC8"}</div>
-              <span style={{fontWeight:700,fontSize:15}}>PaperTrader</span>
-            </div>
-          </div>
-
-          {/* Overlay */}
-          <div className={`sidebar-overlay ${sidebarOpen?'open':''}`} onClick={()=>setSidebarOpen(false)} />
-
-          {/* Sidebar */}
-          <div className={`sidebar ${sidebarOpen?'open':''}`}>
+          <div className="sidebar">
             <div className="sidebar-brand">
-              <div className="brand-row">
-                <div className="brand-icon">{"\uD83D\uDCC8"}</div>
-                <h2>PaperTrader</h2>
-              </div>
-              <div className="tagline">Learn to trade, risk-free</div>
+              <h2>{"\uD83D\uDCC8"} {t('auth.title')}</h2>
+              <span>{t('nav.tagline')}</span>
             </div>
             <div className="sidebar-nav">
-              <div className="nav-section-label">Trading</div>
-              <div className={`nav-item ${page==="dashboard"?"active":""}`} onClick={()=>navigate("dashboard")}>{Icon.dashboard} Dashboard</div>
-              <div className={`nav-item ${page==="portfolio"?"active":""}`} onClick={()=>navigate("portfolio")}>{Icon.portfolio} Portfolio</div>
-              <div className="nav-section-label">Education</div>
-              <div className={`nav-item ${page==="learn"?"active":""}`} onClick={()=>navigate("learn")}>{Icon.learn} Learn</div>
+              <div className={`nav-item ${page === "dashboard" ? "active" : ""}`} onClick={() => setPage("dashboard")}>
+                {icons.dashboard} {t('nav.dashboard')}
+              </div>
+              <div className={`nav-item ${page === "portfolio" ? "active" : ""}`} onClick={() => setPage("portfolio")}>
+                {icons.portfolio} {t('nav.portfolio')}
+              </div>
+              <div className={`nav-item ${page === "learn" ? "active" : ""}`} onClick={() => setPage("learn")}>
+                {icons.learn} {t('nav.learn')}
+              </div>
+            </div>
+            <div style={{ padding: '8px 12px', display: 'flex', gap: 4 }}>
+              <button className={`chart-btn ${locale === 'en' ? 'active' : ''}`} onClick={() => setLanguage('en')} style={{ flex: 1 }}>
+                EN
+              </button>
+              <button className={`chart-btn ${locale === 'es' ? 'active' : ''}`} onClick={() => setLanguage('es')} style={{ flex: 1 }}>
+                ES
+              </button>
             </div>
             <div className="sidebar-footer">
               <div className="user-info">
-                <div className="user-avatar">{(user.displayName||user.email||"U")[0].toUpperCase()}</div>
-                <div style={{minWidth:0}}>
-                  <div className="user-name">{user.displayName||"Trader"}</div>
-                  <div className="user-email" style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user.email}</div>
+                <div className="user-avatar">{(user.displayName || user.email || "U")[0].toUpperCase()}</div>
+                <div>
+                  <div className="user-name">{user.displayName || "Trader"}</div>
+                  <div className="user-email">{user.email}</div>
                 </div>
               </div>
-              <button className="btn btn-outline btn-sm" style={{width:'100%'}} onClick={logout}>{Icon.logout} Sign Out</button>
+              <button className="btn btn-outline btn-sm" style={{width:'100%',justifyContent:'center'}} onClick={logout}>
+                {icons.logout} {t('nav.signOut')}
+              </button>
             </div>
           </div>
-
           <div className="main-content">
             {needsConfig && (
               <div className="config-banner">
-                <span className="banner-icon">{"\u2728"}</span>
-                <span>Running in <strong>demo mode</strong> \u2014 add your Firebase & Finnhub API keys in the source to enable real data and authentication</span>
+                {t('config.demo')} <strong>{t('config.demoMode')}</strong> {t('config.demoDesc')}
               </div>
             )}
-            {page==="dashboard" && <DashboardPage />}
-            {page==="portfolio" && <PortfolioPage />}
-            {page==="learn" && <LearnPage />}
+            {page === "dashboard" && <DashboardPage />}
+            {page === "portfolio" && <PortfolioPage />}
+            {page === "learn" && <LearnPage />}
           </div>
         </div>
       );
@@ -2052,13 +2414,19 @@
 
     function App() {
       return (
-        <ToastProvider>
-          <AuthProvider>
-            <AuthContext.Consumer>
-              {({ user }) => user ? <PortfolioProvider><AppShell /></PortfolioProvider> : <LoginPage />}
-            </AuthContext.Consumer>
-          </AuthProvider>
-        </ToastProvider>
+        <I18nProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <AuthContext.Consumer>
+                {({ user }) => user ? (
+                  <PortfolioProvider><AppShell /></PortfolioProvider>
+                ) : (
+                  <LoginPage />
+                )}
+              </AuthContext.Consumer>
+            </AuthProvider>
+          </ToastProvider>
+        </I18nProvider>
       );
     }
 
