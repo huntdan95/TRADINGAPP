@@ -545,7 +545,11 @@
       .sidebar-overlay.open { display: block; }
       .main-content { margin-left: 0; padding: 68px 14px 24px; }
       .content-grid { grid-template-columns: 1fr !important; }
-      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stat-card { padding: 14px; }
+      .stat-value { font-size: 20px; }
+      .stat-label { font-size: 10px; letter-spacing: .3px; }
+      .stat-change { font-size: 11px; padding: 2px 6px; }
       .page-header { flex-direction: column; align-items: flex-start !important; gap: 12px; }
       .page-header .search-wrapper { width: 100% !important; }
       .card-header { padding: 14px 16px; flex-wrap: wrap; gap: 8px; }
@@ -566,10 +570,11 @@
       .history-item { flex-direction: column; align-items: flex-start; gap: 6px; }
     }
     @media (max-width: 500px) {
-      .stats-grid { grid-template-columns: 1fr; gap: 8px; }
-      .stat-card { padding: 16px; }
-      .stat-value { font-size: 22px; }
-      .stat-label { font-size: 10px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .stat-card { padding: 10px 12px; }
+      .stat-value { font-size: 17px; letter-spacing: -.3px; }
+      .stat-label { font-size: 9px; letter-spacing: .5px; }
+      .stat-change { font-size: 10px; padding: 2px 5px; margin-top: 4px; }
       .main-content { padding: 64px 10px 20px; }
       .card-header h3 { font-size: 13px; }
       .page-header h2 { font-size: 20px; }
@@ -1594,6 +1599,7 @@
       dashboard: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>,
       portfolio: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/></svg>,
       learn: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+      news: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><line x1="10" y1="6" x2="18" y2="6"/><line x1="10" y1="10" x2="18" y2="10"/><line x1="10" y1="14" x2="14" y2="14"/></svg>,
       logout: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
       search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
       menu: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>,
@@ -1975,137 +1981,157 @@
       const [showIndicator, setShowIndicator] = useState(null);
       const [loading, setLoading] = useState(false);
       const [chartError, setChartError] = useState(null);
-      const [demoMode, setDemoMode] = useState(false);
       const [isDemo, setIsDemo] = useState(false);
 
-      const renderChart = useCallback((candles, res) => {
-        try {
-          // Clean up previous
-          if (observerRef.current) { observerRef.current.disconnect(); observerRef.current = null; }
-          if (chartInstance.current) { try { chartInstance.current.remove(); } catch(e){} chartInstance.current = null; }
-
-          const container = chartRef.current;
-          if (!container) return;
-
-          // Check library loaded
-          if (typeof LightweightCharts === "undefined") {
-            setChartError("Chart library failed to load. Check your internet connection and refresh the page.");
-            return;
-          }
-
-          let w = container.clientWidth;
-          if (w <= 0) w = container.parentElement?.clientWidth || container.parentElement?.parentElement?.clientWidth || 600;
-          const h = window.innerWidth <= 500 ? 260 : (window.innerWidth <= 860 ? 300 : 380);
-
-          console.log(`[PaperTrader] Creating chart: ${w}x${h}, ${candles.length} candles`);
-
-          const chart = LightweightCharts.createChart(container, {
-            width: w, height: h,
-            layout: { background: { type:'solid', color:'#141720' }, textColor:'#6b7194', fontFamily:'Inter' },
-            grid: { vertLines: { color:'#1e2235' }, horzLines: { color:'#1e2235' } },
-            crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color:'rgba(108,92,231,.4)' }, horzLine: { color:'rgba(108,92,231,.4)' } },
-            rightPriceScale: { borderColor:'#1e2235' },
-            timeScale: { borderColor:'#1e2235', timeVisible: res!=="D"&&res!=="W" },
-          });
-          chartInstance.current = chart;
-
-          const formatTime = (t) => {
-            if (res === "D" || res === "W" || res === "M") {
-              const d = new Date(t * 1000);
-              return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            }
-            return t;
-          };
-
-          const cs = chart.addCandlestickSeries({ upColor:'#00cec9', downColor:'#ff6b6b', borderUpColor:'#00cec9', borderDownColor:'#ff6b6b', wickUpColor:'#00cec9', wickDownColor:'#ff6b6b' });
-          cs.setData(candles.map(c => ({ time: formatTime(c.time), open:c.open, high:c.high, low:c.low, close:c.close })));
-
-          if (candles.length >= 20) {
-            const sma = [];
-            for (let i=19;i<candles.length;i++) { const s = candles.slice(i-19,i+1).reduce((a,c)=>a+c.close,0); sma.push({ time: formatTime(candles[i].time), value:s/20 }); }
-            chart.addLineSeries({ color:'#a29bfe', lineWidth:1.5, crosshairMarkerVisible:false }).setData(sma);
-          }
-
-          const vol = chart.addHistogramSeries({ priceFormat:{type:'volume'}, priceScaleId:'' });
-          chart.priceScale('').applyOptions({ scaleMargins:{ top:.82, bottom:0 }});
-          vol.setData(candles.map(c => ({ time: formatTime(c.time), value:c.volume, color:c.close>=c.open?'rgba(0,206,201,.2)':'rgba(255,107,107,.2)' })));
-
-          chart.timeScale().fitContent();
-
-          const ro = new ResizeObserver(() => {
-            if (chartInstance.current && container.clientWidth > 0) {
-              chartInstance.current.applyOptions({ width: container.clientWidth });
-            }
-          });
-          ro.observe(container);
-          observerRef.current = ro;
-        } catch (err) {
-          console.error("[PaperTrader] Chart render error:", err);
-          setChartError("Chart rendering failed: " + err.message);
-        }
-      }, []);
-
       useEffect(() => {
-        if (!chartRef.current || !symbol) return;
+        if (!symbol) return;
         let cancelled = false;
 
-        const raf = requestAnimationFrame(() => {
-          requestAnimationFrame(async () => {
-            if (cancelled) return;
-            setLoading(true);
-            setChartError(null);
-            setIsDemo(false);
+        // Small delay to ensure DOM is painted and container has dimensions
+        const timer = setTimeout(async () => {
+          if (cancelled) return;
 
-            if (demoMode) {
-              const demo = generateDemoCandles(symbol);
-              setIsDemo(true);
-              renderChart(demo, resolution);
+          // Cleanup previous chart
+          if (observerRef.current) { try { observerRef.current.disconnect(); } catch(e){} observerRef.current = null; }
+          if (chartInstance.current) { try { chartInstance.current.remove(); } catch(e){} chartInstance.current = null; }
+
+          setLoading(true);
+          setChartError(null);
+          setIsDemo(false);
+
+          try {
+            // Check chart library
+            if (typeof LightweightCharts === "undefined") {
+              setChartError("Chart library failed to load. Refresh the page.");
               setLoading(false);
               return;
             }
 
+            // Fetch candle data
+            console.log(`[TD] Fetching candles for ${symbol} (${resolution})...`);
             const result = await getCandles(symbol, resolution);
             if (cancelled) return;
 
-            if (result.candles && result.candles.length > 0) {
-              setIsDemo(!!result.isDemo);
-              renderChart(result.candles, resolution);
-            } else {
-              // API failed — auto-fallback to demo data
-              console.log("[PaperTrader] API returned no data, falling back to demo candles");
-              const demo = generateDemoCandles(symbol);
-              setIsDemo(true);
-              renderChart(demo, resolution);
-              if (result.error) {
-                console.warn("[PaperTrader] API error (showing demo):", result.error);
-              }
-            }
-            setLoading(false);
-          });
-        });
+            let candles = result.candles || [];
+            let demo = !!result.isDemo;
 
-        return () => {
+            // If API returned nothing, fallback to demo
+            if (candles.length === 0) {
+              console.log("[TD] No candle data from API, using demo candles");
+              candles = generateDemoCandles(symbol);
+              demo = true;
+              if (result.error) console.warn("[TD] API error:", result.error);
+            }
+
+            setIsDemo(demo);
+
+            // Get container
+            const container = chartRef.current;
+            if (!container || cancelled) { setLoading(false); return; }
+
+            let w = container.clientWidth;
+            if (w <= 0) w = container.parentElement ? container.parentElement.clientWidth : 600;
+            if (w <= 0) w = 600;
+            const h = window.innerWidth <= 500 ? 260 : (window.innerWidth <= 860 ? 300 : 380);
+
+            console.log(`[TD] Creating chart: ${w}x${h}, ${candles.length} candles, demo=${demo}`);
+
+            // Create chart
+            const chart = LightweightCharts.createChart(container, {
+              width: w,
+              height: h,
+              layout: { background: { type: 'solid', color: '#141720' }, textColor: '#6b7194', fontFamily: 'Inter' },
+              grid: { vertLines: { color: '#1e2235' }, horzLines: { color: '#1e2235' } },
+              crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+              rightPriceScale: { borderColor: '#1e2235' },
+              timeScale: { borderColor: '#1e2235', timeVisible: resolution !== "D" && resolution !== "W" },
+            });
+            chartInstance.current = chart;
+
+            // Format time: use YYYY-MM-DD string for daily/weekly, unix for intraday
+            const fmtTime = (unixTs) => {
+              const d = new Date(unixTs * 1000);
+              if (resolution === "D" || resolution === "W") {
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                return yyyy + '-' + mm + '-' + dd;
+              }
+              return unixTs;
+            };
+
+            // Add candlestick series
+            const candleSeries = chart.addCandlestickSeries({
+              upColor: '#00cec9', downColor: '#ff6b6b',
+              borderUpColor: '#00cec9', borderDownColor: '#ff6b6b',
+              wickUpColor: '#00cec9', wickDownColor: '#ff6b6b'
+            });
+
+            const chartData = candles.map(function(c) {
+              return { time: fmtTime(c.time), open: c.open, high: c.high, low: c.low, close: c.close };
+            });
+            console.log("[TD] First candle:", JSON.stringify(chartData[0]), "Last:", JSON.stringify(chartData[chartData.length-1]));
+            candleSeries.setData(chartData);
+
+            // SMA overlay (20-period)
+            if (candles.length >= 20) {
+              const smaData = [];
+              for (var i = 19; i < candles.length; i++) {
+                var sum = 0;
+                for (var j = i - 19; j <= i; j++) sum += candles[j].close;
+                smaData.push({ time: fmtTime(candles[i].time), value: sum / 20 });
+              }
+              chart.addLineSeries({ color: '#a29bfe', lineWidth: 1.5, crosshairMarkerVisible: false }).setData(smaData);
+            }
+
+            // Volume histogram
+            var volSeries = chart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: '' });
+            chart.priceScale('').applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+            volSeries.setData(candles.map(function(c) {
+              return { time: fmtTime(c.time), value: c.volume, color: c.close >= c.open ? 'rgba(0,206,201,.2)' : 'rgba(255,107,107,.2)' };
+            }));
+
+            chart.timeScale().fitContent();
+            console.log("[TD] Chart rendered successfully");
+
+            // Resize observer
+            var ro = new ResizeObserver(function() {
+              if (chartInstance.current && container.clientWidth > 0) {
+                chartInstance.current.applyOptions({ width: container.clientWidth });
+              }
+            });
+            ro.observe(container);
+            observerRef.current = ro;
+
+          } catch (err) {
+            console.error("[TD] Chart error:", err);
+            setChartError("Chart failed: " + err.message);
+          }
+          setLoading(false);
+        }, 100);
+
+        return function() {
           cancelled = true;
-          cancelAnimationFrame(raf);
-          if (observerRef.current) { observerRef.current.disconnect(); observerRef.current = null; }
+          clearTimeout(timer);
+          if (observerRef.current) { try { observerRef.current.disconnect(); } catch(e){} observerRef.current = null; }
           if (chartInstance.current) { try { chartInstance.current.remove(); } catch(e){} chartInstance.current = null; }
         };
-      }, [symbol, resolution, demoMode, renderChart]);
+      }, [symbol, resolution]);
 
       return (
         <div>
           <div className="chart-toolbar">
             <div className="chart-controls">
-              {["D","W","5","15","60"].map(r => (
-                <button key={r} className={`chart-btn ${resolution===r?'active':''}`} onClick={()=>setResolution(r)}>{r==="60"?"1H":r}</button>
-              ))}
+              {["D","W","5","15","60"].map(function(r) { return (
+                <button key={r} className={"chart-btn " + (resolution===r?'active':'')} onClick={function(){setResolution(r)}}>{r==="60"?"1H":r}</button>
+              ); })}
             </div>
             <div style={{display:'flex',alignItems:'center',gap:8}}>
               {isDemo && <span style={{fontSize:11,color:'#f39c12',fontWeight:600,background:'rgba(243,156,18,.12)',padding:'3px 8px',borderRadius:6}}>DEMO DATA</span>}
               <div className="chart-controls">
-                {[["rsi","RSI"],["macd","MACD"],["ma","MA"],["vol","VOL"]].map(([k,label]) => (
-                  <button key={k} className="chart-btn-indicator" onClick={()=>setShowIndicator(k)}>{label}</button>
-                ))}
+                {[["rsi","RSI"],["macd","MACD"],["ma","MA"],["vol","VOL"]].map(function(pair) { return (
+                  <button key={pair[0]} className="chart-btn-indicator" onClick={function(){setShowIndicator(pair[0])}}>{pair[1]}</button>
+                ); })}
               </div>
             </div>
           </div>
@@ -2117,12 +2143,11 @@
                 <div style={{textAlign:'center',padding:20}}>
                   <div style={{fontSize:32,marginBottom:8}}>{"\uD83D\uDCC9"}</div>
                   <div style={{color:'var(--text-dim)',fontSize:13,maxWidth:300,marginBottom:12}}>{chartError}</div>
-                  <button className="chart-btn active" onClick={()=>{ setDemoMode(true); }} style={{fontSize:12,padding:'6px 14px'}}>Load Demo Chart</button>
                 </div>
               </div>
             )}
           </div>
-          {showIndicator && <IndicatorPopup indicator={showIndicator} onClose={()=>setShowIndicator(null)} />}
+          {showIndicator && <IndicatorPopup indicator={showIndicator} onClose={function(){setShowIndicator(null)}} />}
         </div>
       );
     }
@@ -2705,7 +2730,6 @@
     function LearnPage() {
       const [active, setActive] = useState(null);
       const [filter, setFilter] = useState("all");
-      const [tab, setTab] = useState("lessons");
 
       const categories = useMemo(() => {
         const cats = [...new Set(ALL_LESSONS.map(l => l.cat))];
@@ -2718,7 +2742,7 @@
           : ALL_LESSONS.filter(l => l.cat === filter);
 
       if (active !== null) {
-        const l = ALL_LESSONS[active]; // use absolute index
+        const l = ALL_LESSONS[active];
         return (
           <div className="page-enter lesson-detail">
             <button className="back-btn" onClick={()=>setActive(null)}>{Icon.back} Back to Lessons</button>
@@ -2740,56 +2764,52 @@
         <div className="page-enter">
           <div className="page-header" style={{flexDirection:'column',alignItems:'flex-start'}}>
             <h2>Learn to Trade</h2>
-            <p style={{color:'var(--text-dim)',fontSize:14,marginTop:4}}>{ALL_LESSONS.length} lessons + live stock news</p>
+            <p style={{color:'var(--text-dim)',fontSize:14,marginTop:4}}>{ALL_LESSONS.length} lessons from beginner to advanced</p>
           </div>
 
-          {/* Tab switcher: Lessons | Stock News */}
-          <div style={{display:'flex',gap:0,marginBottom:20,borderBottom:'2px solid var(--border)'}}>
-            {[["lessons","Lessons"],["news","Stock News"]].map(([key,label]) => (
-              <button key={key} onClick={()=>setTab(key)}
-                style={{padding:'10px 24px',fontSize:14,fontWeight:tab===key?700:500,color:tab===key?'var(--accent)':'var(--text-dim)',
-                  background:'transparent',border:'none',borderBottom:tab===key?'2px solid var(--accent)':'2px solid transparent',
-                  marginBottom:'-2px',cursor:'pointer',transition:'all .2s'}}>
-                {label}
-              </button>
+          <div style={{display:'flex',gap:6,marginBottom:24,flexWrap:'wrap'}}>
+            {[["all","All"],["beginner","Beginner"],["intermediate","Intermediate"],["advanced","Advanced"]].map(([key,label]) => (
+              <button key={key} className={`chart-btn ${filter===key?'active':''}`} style={{padding:'6px 16px',fontSize:13}}
+                onClick={()=>setFilter(key)}>{label}{key!=="all" && ` (${ALL_LESSONS.filter(l=>key==="all"||l.level===key).length})`}</button>
+            ))}
+            <span style={{width:1,height:24,background:'var(--border)',margin:'0 4px',alignSelf:'center'}}/>
+            {categories.map(cat => (
+              <button key={cat} className={`chart-btn ${filter===cat?'active':''}`} style={{padding:'6px 14px',fontSize:12}}
+                onClick={()=>setFilter(filter===cat?"all":cat)}>{cat}</button>
             ))}
           </div>
 
-          {tab === "lessons" && (
-            <>
-              {/* Filter chips */}
-              <div style={{display:'flex',gap:6,marginBottom:24,flexWrap:'wrap'}}>
-                {[["all","All"],["beginner","Beginner"],["intermediate","Intermediate"],["advanced","Advanced"]].map(([key,label]) => (
-                  <button key={key} className={`chart-btn ${filter===key?'active':''}`} style={{padding:'6px 16px',fontSize:13}}
-                    onClick={()=>setFilter(key)}>{label}{key!=="all" && ` (${ALL_LESSONS.filter(l=>key==="all"||l.level===key).length})`}</button>
-                ))}
-                <span style={{width:1,height:24,background:'var(--border)',margin:'0 4px',alignSelf:'center'}}/>
-                {categories.map(cat => (
-                  <button key={cat} className={`chart-btn ${filter===cat?'active':''}`} style={{padding:'6px 14px',fontSize:12}}
-                    onClick={()=>setFilter(filter===cat?"all":cat)}>{cat}</button>
-                ))}
-              </div>
+          <div className="lesson-grid">
+            {filtered.map((l) => {
+              const absIndex = ALL_LESSONS.indexOf(l);
+              return (
+                <div key={absIndex} className="lesson-card" onClick={()=>setActive(absIndex)}>
+                  <span className="lesson-icon">{l.icon}</span>
+                  <h3>{l.title}</h3>
+                  <p>{l.content.substring(0,120)}...</p>
+                  <div style={{display:'flex',gap:6,marginTop:12}}>
+                    <span style={{fontSize:10,color:'var(--text-muted)',background:'var(--surface2)',padding:'3px 8px',borderRadius:20}}>{l.cat}</span>
+                    <span className={`lesson-tag ${l.level}`}>{l.level}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
 
-              <div className="lesson-grid">
-                {filtered.map((l) => {
-                  const absIndex = ALL_LESSONS.indexOf(l);
-                  return (
-                    <div key={absIndex} className="lesson-card" onClick={()=>setActive(absIndex)}>
-                      <span className="lesson-icon">{l.icon}</span>
-                      <h3>{l.title}</h3>
-                      <p>{l.content.substring(0,120)}...</p>
-                      <div style={{display:'flex',gap:6,marginTop:12}}>
-                        <span style={{fontSize:10,color:'var(--text-muted)',background:'var(--surface2)',padding:'3px 8px',borderRadius:20}}>{l.cat}</span>
-                        <span className={`lesson-tag ${l.level}`}>{l.level}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {tab === "news" && <StockNews />}
+    // ═══════════════════════════════════════════════════════
+    // NEWS PAGE (separate sidebar tab)
+    // ═══════════════════════════════════════════════════════
+    function NewsPage() {
+      return (
+        <div className="page-enter">
+          <div className="page-header" style={{flexDirection:'column',alignItems:'flex-start'}}>
+            <h2>Stock News</h2>
+            <p style={{color:'var(--text-dim)',fontSize:14,marginTop:4}}>Latest headlines for any stock</p>
+          </div>
+          <StockNews />
         </div>
       );
     }
@@ -2834,6 +2854,7 @@
               <div className={`nav-item ${page==="portfolio"?"active":""}`} onClick={()=>navigate("portfolio")}>{Icon.portfolio} Portfolio</div>
               <div className="nav-section-label">Education</div>
               <div className={`nav-item ${page==="learn"?"active":""}`} onClick={()=>navigate("learn")}>{Icon.learn} Learn</div>
+              <div className={`nav-item ${page==="news"?"active":""}`} onClick={()=>navigate("news")}>{Icon.news} News</div>
             </div>
             <div className="sidebar-footer">
               <div className="user-info">
@@ -2843,7 +2864,7 @@
                   <div className="user-email" style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{user.email}</div>
                 </div>
               </div>
-              <button className="btn btn-outline btn-sm" style={{width:'100%'}} onClick={logout}>{Icon.logout} Sign Out</button>
+              <button className="btn btn-outline" style={{width:'100%',padding:'6px 10px',fontSize:12,gap:6}} onClick={logout}>{Icon.logout} Sign Out</button>
             </div>
           </div>
 
@@ -2857,6 +2878,7 @@
             {page==="dashboard" && <DashboardPage />}
             {page==="portfolio" && <PortfolioPage />}
             {page==="learn" && <LearnPage />}
+            {page==="news" && <NewsPage />}
           </div>
         </div>
       );
