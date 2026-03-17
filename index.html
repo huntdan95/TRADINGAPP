@@ -1350,36 +1350,68 @@
       } catch { return null; }
     }
 
+    function generateDemoCandles(symbol) {
+      const candles = [];
+      let price = ({ AAPL:189, MSFT:421, GOOGL:174, TSLA:248, AMZN:196, META:505, NVDA:880, NFLX:620, JPM:198, V:280 })[symbol] || 150;
+      const now = Math.floor(Date.now()/1000);
+      for (let i=90; i>=0; i--) {
+        const t = now - i*86400;
+        price += (Math.random()-0.48)*4;
+        price = Math.max(20, price);
+        candles.push({
+          time: t,
+          open: +(price+(Math.random()-.5)*2).toFixed(2),
+          high: +(price+Math.random()*3).toFixed(2),
+          low: +(price-Math.random()*3).toFixed(2),
+          close: +price.toFixed(2),
+          volume: Math.floor(Math.random()*5000000+500000)
+        });
+      }
+      return candles;
+    }
+
     async function getCandles(symbol, resolution = "D", from, to) {
       if (!apiKey) {
-        const candles = [];
-        let price = ({ AAPL:189, MSFT:421, GOOGL:174, TSLA:248, AMZN:196 })[symbol] || 150;
-        const now = Math.floor(Date.now()/1000);
-        for (let i=90; i>=0; i--) {
-          const t = now - i*86400;
-          price += (Math.random()-0.48)*4;
-          price = Math.max(20, price);
-          candles.push({
-            time: t,
-            open: price+(Math.random()-.5)*2,
-            high: price+Math.random()*3,
-            low: price-Math.random()*3,
-            close: price,
-            volume: Math.floor(Math.random()*5000000+500000)
-          });
-        }
-        return candles;
+        console.log("[PaperTrader] No API key — using demo data");
+        return { candles: generateDemoCandles(symbol), isDemo: true };
       }
       if (!from) { to = Math.floor(Date.now()/1000); from = to - 90*86400; }
       try {
         const url = `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=${resolution}&from=${from}&to=${to}&token=${apiKey}`;
-        console.log(`[PaperTrader] Candle request: ${symbol} ${resolution}`);
+        console.log(`[PaperTrader] Candle request: ${url}`);
         const res = await fetch(url);
+        if (!res.ok) {
+          console.error(`[PaperTrader] HTTP ${res.status}: ${res.statusText}`);
+          return { candles: [], error: `API returned HTTP ${res.status}. Your API key may be invalid or expired.` };
+        }
         const data = await res.json();
-        console.log(`[PaperTrader] Candle response status: ${data.s}, points: ${data.t?.length || 0}`);
-        if (data.s !== "ok" || !data.t) return [];
-        return data.t.map((t,i) => ({ time:t, open:data.o[i], high:data.h[i], low:data.l[i], close:data.c[i], volume:data.v?.[i]||0 }));
-      } catch(err) { console.error("[PaperTrader] Candle fetch failed:", err); return []; }
+        console.log(`[PaperTrader] Candle response:`, JSON.stringify(data).slice(0, 300));
+        if (data.error) {
+          console.error(`[PaperTrader] API error: ${data.error}`);
+          return { candles: [], error: `Finnhub error: ${data.error}` };
+        }
+        if (data.s !== "ok" || !data.t || data.t.length === 0) {
+          const reason = data.s === "no_data" ? "No data available for this symbol/timeframe." : `API returned status "${data.s}".`;
+          return { candles: [], error: reason + (resolution !== "D" ? " Intraday data requires a paid Finnhub plan — try Daily (D)." : "") };
+        }
+        return { candles: data.t.map((t,i) => ({ time:t, open:data.o[i], high:data.h[i], low:data.l[i], close:data.c[i], volume:data.v?.[i]||0 })), isDemo: false };
+      } catch(err) {
+        console.error("[PaperTrader] Candle fetch failed:", err);
+        return { candles: [], error: `Network error: ${err.message}. Check your internet connection.` };
+      }
+    }
+
+    async function getCompanyNews(symbol) {
+      if (!apiKey) return [];
+      try {
+        const to = new Date().toISOString().slice(0,10);
+        const fromDate = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
+        const url = `https://finnhub.io/api/v1/company-news?symbol=${symbol}&from=${fromDate}&to=${to}&token=${apiKey}`;
+        const res = await fetch(url);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data) ? data.slice(0, 10) : [];
+      } catch(err) { console.error("[PaperTrader] News fetch failed:", err); return []; }
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1870,39 +1902,29 @@
       const [showIndicator, setShowIndicator] = useState(null);
       const [loading, setLoading] = useState(false);
       const [chartError, setChartError] = useState(null);
+      const [demoMode, setDemoMode] = useState(false);
+      const [isDemo, setIsDemo] = useState(false);
 
-      useEffect(() => {
-        if (!chartRef.current || !symbol) return;
-        // Wait for next frame so the container has layout dimensions
-        const raf = requestAnimationFrame(() => {
-          // Double-RAF to guarantee paint
-          requestAnimationFrame(() => loadChart());
-        });
-        return () => {
-          cancelAnimationFrame(raf);
-          if (observerRef.current) { observerRef.current.disconnect(); observerRef.current = null; }
-          if (chartInstance.current) { try { chartInstance.current.remove(); } catch(e){} chartInstance.current = null; }
-        };
-      }, [symbol, resolution]);
-
-      const loadChart = async () => {
-        setLoading(true);
-        setChartError(null);
+      const renderChart = useCallback((candles, res) => {
         try {
           // Clean up previous
           if (observerRef.current) { observerRef.current.disconnect(); observerRef.current = null; }
           if (chartInstance.current) { try { chartInstance.current.remove(); } catch(e){} chartInstance.current = null; }
 
           const container = chartRef.current;
-          if (!container) { setLoading(false); return; }
+          if (!container) return;
 
-          // Ensure container has width
-          let w = container.clientWidth;
-          if (w <= 0) {
-            // Fallback: use parent width or a reasonable default
-            w = container.parentElement?.clientWidth || 600;
+          // Check library loaded
+          if (typeof LightweightCharts === "undefined") {
+            setChartError("Chart library failed to load. Check your internet connection and refresh the page.");
+            return;
           }
+
+          let w = container.clientWidth;
+          if (w <= 0) w = container.parentElement?.clientWidth || container.parentElement?.parentElement?.clientWidth || 600;
           const h = window.innerWidth <= 500 ? 260 : (window.innerWidth <= 860 ? 300 : 380);
+
+          console.log(`[PaperTrader] Creating chart: ${w}x${h}, ${candles.length} candles`);
 
           const chart = LightweightCharts.createChart(container, {
             width: w, height: h,
@@ -1910,43 +1932,33 @@
             grid: { vertLines: { color:'#1e2235' }, horzLines: { color:'#1e2235' } },
             crosshair: { mode: LightweightCharts.CrosshairMode.Normal, vertLine: { color:'rgba(108,92,231,.4)' }, horzLine: { color:'rgba(108,92,231,.4)' } },
             rightPriceScale: { borderColor:'#1e2235' },
-            timeScale: { borderColor:'#1e2235', timeVisible: resolution!=="D"&&resolution!=="W" },
+            timeScale: { borderColor:'#1e2235', timeVisible: res!=="D"&&res!=="W" },
           });
           chartInstance.current = chart;
 
-          console.log(`[PaperTrader] Fetching candles for ${symbol} (${resolution})...`);
-          const candles = await getCandles(symbol, resolution);
-          console.log(`[PaperTrader] Got ${candles.length} candles for ${symbol}`);
-
-          if (candles.length > 0) {
-            // Convert Unix timestamps to YYYY-MM-DD for daily/weekly (more reliable in LightweightCharts v4)
-            const formatTime = (t) => {
-              if (resolution === "D" || resolution === "W" || resolution === "M") {
-                const d = new Date(t * 1000);
-                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-              }
-              return t; // keep Unix timestamp for intraday
-            };
-
-            const cs = chart.addCandlestickSeries({ upColor:'#00cec9', downColor:'#ff6b6b', borderUpColor:'#00cec9', borderDownColor:'#ff6b6b', wickUpColor:'#00cec9', wickDownColor:'#ff6b6b' });
-            cs.setData(candles.map(c => ({ time: formatTime(c.time), open:c.open, high:c.high, low:c.low, close:c.close })));
-
-            if (candles.length >= 20) {
-              const sma = [];
-              for (let i=19;i<candles.length;i++) { const s = candles.slice(i-19,i+1).reduce((a,c)=>a+c.close,0); sma.push({ time: formatTime(candles[i].time), value:s/20 }); }
-              chart.addLineSeries({ color:'#a29bfe', lineWidth:1.5, crosshairMarkerVisible:false }).setData(sma);
+          const formatTime = (t) => {
+            if (res === "D" || res === "W" || res === "M") {
+              const d = new Date(t * 1000);
+              return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
             }
+            return t;
+          };
 
-            const vol = chart.addHistogramSeries({ priceFormat:{type:'volume'}, priceScaleId:'' });
-            chart.priceScale('').applyOptions({ scaleMargins:{ top:.82, bottom:0 }});
-            vol.setData(candles.map(c => ({ time: formatTime(c.time), value:c.volume, color:c.close>=c.open?'rgba(0,206,201,.2)':'rgba(255,107,107,.2)' })));
-          } else {
-            setChartError("No chart data available" + (resolution !== "D" ? ". Try switching to Daily (D) — intraday data requires a premium Finnhub plan." : " for this symbol."));
+          const cs = chart.addCandlestickSeries({ upColor:'#00cec9', downColor:'#ff6b6b', borderUpColor:'#00cec9', borderDownColor:'#ff6b6b', wickUpColor:'#00cec9', wickDownColor:'#ff6b6b' });
+          cs.setData(candles.map(c => ({ time: formatTime(c.time), open:c.open, high:c.high, low:c.low, close:c.close })));
+
+          if (candles.length >= 20) {
+            const sma = [];
+            for (let i=19;i<candles.length;i++) { const s = candles.slice(i-19,i+1).reduce((a,c)=>a+c.close,0); sma.push({ time: formatTime(candles[i].time), value:s/20 }); }
+            chart.addLineSeries({ color:'#a29bfe', lineWidth:1.5, crosshairMarkerVisible:false }).setData(sma);
           }
+
+          const vol = chart.addHistogramSeries({ priceFormat:{type:'volume'}, priceScaleId:'' });
+          chart.priceScale('').applyOptions({ scaleMargins:{ top:.82, bottom:0 }});
+          vol.setData(candles.map(c => ({ time: formatTime(c.time), value:c.volume, color:c.close>=c.open?'rgba(0,206,201,.2)':'rgba(255,107,107,.2)' })));
 
           chart.timeScale().fitContent();
 
-          // Resize observer with cleanup ref
           const ro = new ResizeObserver(() => {
             if (chartInstance.current && container.clientWidth > 0) {
               chartInstance.current.applyOptions({ width: container.clientWidth });
@@ -1954,13 +1966,58 @@
           });
           ro.observe(container);
           observerRef.current = ro;
-
         } catch (err) {
-          console.error("[PaperTrader] Chart error:", err);
-          setChartError("Failed to load chart. Please try again.");
+          console.error("[PaperTrader] Chart render error:", err);
+          setChartError("Chart rendering failed: " + err.message);
         }
-        setLoading(false);
-      };
+      }, []);
+
+      useEffect(() => {
+        if (!chartRef.current || !symbol) return;
+        let cancelled = false;
+
+        const raf = requestAnimationFrame(() => {
+          requestAnimationFrame(async () => {
+            if (cancelled) return;
+            setLoading(true);
+            setChartError(null);
+            setIsDemo(false);
+
+            if (demoMode) {
+              const demo = generateDemoCandles(symbol);
+              setIsDemo(true);
+              renderChart(demo, resolution);
+              setLoading(false);
+              return;
+            }
+
+            const result = await getCandles(symbol, resolution);
+            if (cancelled) return;
+
+            if (result.candles && result.candles.length > 0) {
+              setIsDemo(!!result.isDemo);
+              renderChart(result.candles, resolution);
+            } else {
+              // API failed — auto-fallback to demo data
+              console.log("[PaperTrader] API returned no data, falling back to demo candles");
+              const demo = generateDemoCandles(symbol);
+              setIsDemo(true);
+              renderChart(demo, resolution);
+              if (result.error) {
+                console.warn("[PaperTrader] API error (showing demo):", result.error);
+              }
+            }
+            setLoading(false);
+          });
+        });
+
+        return () => {
+          cancelled = true;
+          cancelAnimationFrame(raf);
+          if (observerRef.current) { observerRef.current.disconnect(); observerRef.current = null; }
+          if (chartInstance.current) { try { chartInstance.current.remove(); } catch(e){} chartInstance.current = null; }
+        };
+      }, [symbol, resolution, demoMode, renderChart]);
 
       return (
         <div>
@@ -1970,16 +2027,27 @@
                 <button key={r} className={`chart-btn ${resolution===r?'active':''}`} onClick={()=>setResolution(r)}>{r==="60"?"1H":r}</button>
               ))}
             </div>
-            <div className="chart-controls">
-              {[["rsi","RSI"],["macd","MACD"],["ma","MA"],["vol","VOL"]].map(([k,label]) => (
-                <button key={k} className="chart-btn-indicator" onClick={()=>setShowIndicator(k)}>{label}</button>
-              ))}
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              {isDemo && <span style={{fontSize:11,color:'#f39c12',fontWeight:600,background:'rgba(243,156,18,.12)',padding:'3px 8px',borderRadius:6}}>DEMO DATA</span>}
+              <div className="chart-controls">
+                {[["rsi","RSI"],["macd","MACD"],["ma","MA"],["vol","VOL"]].map(([k,label]) => (
+                  <button key={k} className="chart-btn-indicator" onClick={()=>setShowIndicator(k)}>{label}</button>
+                ))}
+              </div>
             </div>
           </div>
           <div style={{position:'relative'}}>
             <div ref={chartRef} style={{width:'100%',minHeight:window.innerWidth<=500?260:window.innerWidth<=860?300:380}} />
             {loading && <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(20,23,32,.6)'}}><div className="spinner" style={{width:28,height:28}}/></div>}
-            {chartError && !loading && <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(20,23,32,.85)',borderRadius:10}}><div style={{textAlign:'center',padding:20}}><div style={{fontSize:32,marginBottom:8}}>{"\uD83D\uDCC9"}</div><div style={{color:'var(--text-dim)',fontSize:13,maxWidth:280}}>{chartError}</div></div></div>}
+            {chartError && !loading && (
+              <div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(20,23,32,.85)',borderRadius:10}}>
+                <div style={{textAlign:'center',padding:20}}>
+                  <div style={{fontSize:32,marginBottom:8}}>{"\uD83D\uDCC9"}</div>
+                  <div style={{color:'var(--text-dim)',fontSize:13,maxWidth:300,marginBottom:12}}>{chartError}</div>
+                  <button className="chart-btn active" onClick={()=>{ setDemoMode(true); }} style={{fontSize:12,padding:'6px 14px'}}>Load Demo Chart</button>
+                </div>
+              </div>
+            )}
           </div>
           {showIndicator && <IndicatorPopup indicator={showIndicator} onClose={()=>setShowIndicator(null)} />}
         </div>
@@ -2339,9 +2407,128 @@
       { icon:"\uD83D\uDEA8", title:"Common Day Trading Mistakes & How to Avoid Them", level:"advanced", cat:"Day Trading", content:"Mistake 1: No Stop-Loss. 'I'll just hold and it will come back.' This is how accounts blow up. Every single trade needs a pre-defined stop.\n\nMistake 2: Oversizing. Putting 50%+ of your account in one trade because you're 'sure' it will work. It only takes one bad trade to destroy months of gains. Stick to 1-2% risk per trade.\n\nMistake 3: Trading the First 5 Minutes. The open is chaos \u2014 wide spreads, fake breakouts, and algorithmic manipulation. Unless you're an experienced scalper, wait for the first 15 minutes to pass and let the range establish.\n\nMistake 4: Averaging Down on a Day Trade. Your trade goes against you, so you buy more to lower your average. This doubles your risk on a losing position. Cut your loss and move on.\n\nMistake 5: Not Having a Watchlist. Scanning random stocks during market hours leads to impulsive trades. Do your homework pre-market.\n\nMistake 6: Ignoring the Overall Market. If the S&P 500 is tanking, most long setups will fail. Always check the overall market direction (SPY, QQQ) before taking individual trades.\n\nMistake 7: Moving Your Stop-Loss. You set a stop at $48, price drops to $48.10, and you move it to $47. Then $46. Then $45. Suddenly you've taken a loss 4x bigger than planned. Set it and forget it.\n\nMistake 8: Trading While Emotional. Angry, excited, revenge-trading, scared, overconfident \u2014 all of these states lead to poor decisions. The market doesn't care about your feelings." },
     ];
 
+    // ═══════════════════════════════════════════════════════
+    // STOCK NEWS COMPONENT
+    // ═══════════════════════════════════════════════════════
+    const POPULAR_SYMBOLS = [
+      { sym: "AAPL", name: "Apple" }, { sym: "MSFT", name: "Microsoft" }, { sym: "GOOGL", name: "Google" },
+      { sym: "TSLA", name: "Tesla" }, { sym: "AMZN", name: "Amazon" }, { sym: "NVDA", name: "NVIDIA" },
+      { sym: "META", name: "Meta" }, { sym: "NFLX", name: "Netflix" }, { sym: "JPM", name: "JPMorgan" },
+      { sym: "DIS", name: "Disney" }, { sym: "AMD", name: "AMD" }, { sym: "BA", name: "Boeing" },
+      { sym: "V", name: "Visa" }, { sym: "WMT", name: "Walmart" }, { sym: "COIN", name: "Coinbase" }
+    ];
+
+    function StockNews() {
+      const [newsSym, setNewsSym] = useState("AAPL");
+      const [customSym, setCustomSym] = useState("");
+      const [articles, setArticles] = useState([]);
+      const [newsLoading, setNewsLoading] = useState(false);
+      const [newsError, setNewsError] = useState(null);
+
+      const fetchNews = useCallback(async (sym) => {
+        setNewsLoading(true);
+        setNewsError(null);
+        setArticles([]);
+        try {
+          const data = await getCompanyNews(sym);
+          if (data.length === 0) {
+            setNewsError(apiKey ? `No recent news found for ${sym}. Try another stock.` : "News requires a Finnhub API key. Add your key to enable this feature.");
+          } else {
+            setArticles(data);
+          }
+        } catch (err) {
+          setNewsError("Failed to load news: " + err.message);
+        }
+        setNewsLoading(false);
+      }, []);
+
+      useEffect(() => { fetchNews(newsSym); }, [newsSym, fetchNews]);
+
+      const handleCustomSearch = (e) => {
+        e.preventDefault();
+        const sym = customSym.trim().toUpperCase();
+        if (sym.length >= 1 && sym.length <= 5) {
+          setNewsSym(sym);
+          setCustomSym("");
+        }
+      };
+
+      const timeAgo = (ts) => {
+        const diff = Math.floor((Date.now()/1000) - ts);
+        if (diff < 3600) return Math.floor(diff/60) + "m ago";
+        if (diff < 86400) return Math.floor(diff/3600) + "h ago";
+        return Math.floor(diff/86400) + "d ago";
+      };
+
+      return (
+        <div>
+          {/* Stock Selector */}
+          <div style={{marginBottom:20}}>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12}}>
+              {POPULAR_SYMBOLS.map(s => (
+                <button key={s.sym} className={`chart-btn ${newsSym===s.sym?'active':''}`}
+                  style={{padding:'5px 12px',fontSize:12}} onClick={()=>setNewsSym(s.sym)}>
+                  {s.sym}
+                </button>
+              ))}
+            </div>
+            <form onSubmit={handleCustomSearch} style={{display:'flex',gap:8}}>
+              <input type="text" value={customSym} onChange={e=>setCustomSym(e.target.value.toUpperCase())}
+                placeholder="Enter any ticker (e.g. PLTR)" maxLength={5}
+                style={{flex:1,background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,padding:'8px 14px',color:'var(--text)',fontSize:14,outline:'none'}} />
+              <button type="submit" className="chart-btn active" style={{padding:'8px 18px',fontSize:13}}>Search</button>
+            </form>
+          </div>
+
+          <h3 style={{fontSize:16,fontWeight:700,marginBottom:16,color:'var(--text)'}}>Latest News for {newsSym}</h3>
+
+          {newsLoading && (
+            <div style={{display:'flex',alignItems:'center',justifyContent:'center',padding:40}}>
+              <div className="spinner" style={{width:24,height:24}} />
+            </div>
+          )}
+
+          {newsError && !newsLoading && (
+            <div style={{textAlign:'center',padding:40,color:'var(--text-dim)'}}>
+              <div style={{fontSize:28,marginBottom:8}}>{"\uD83D\uDCF0"}</div>
+              <p style={{fontSize:13}}>{newsError}</p>
+            </div>
+          )}
+
+          {!newsLoading && articles.length > 0 && (
+            <div style={{display:'flex',flexDirection:'column',gap:12}}>
+              {articles.map((a,i) => (
+                <a key={i} href={a.url} target="_blank" rel="noopener noreferrer"
+                  style={{display:'flex',gap:14,padding:16,background:'var(--surface2)',borderRadius:12,border:'1px solid var(--border)',textDecoration:'none',color:'inherit',transition:'border-color .2s',cursor:'pointer'}}
+                  onMouseEnter={e=>e.currentTarget.style.borderColor='var(--accent)'}
+                  onMouseLeave={e=>e.currentTarget.style.borderColor='var(--border)'}>
+                  {a.image && (
+                    <div style={{flexShrink:0,width:80,height:60,borderRadius:8,overflow:'hidden',background:'var(--surface3)'}}>
+                      <img src={a.image} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}}
+                        onError={e=>{e.target.style.display='none'}} />
+                    </div>
+                  )}
+                  <div style={{flex:1,minWidth:0}}>
+                    <h4 style={{fontSize:14,fontWeight:600,lineHeight:1.3,marginBottom:4,color:'var(--text)',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{a.headline}</h4>
+                    <p style={{fontSize:12,color:'var(--text-dim)',margin:0,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{a.summary}</p>
+                    <div style={{display:'flex',gap:10,marginTop:6,fontSize:11,color:'var(--text-muted)'}}>
+                      <span>{a.source}</span>
+                      <span>{a.datetime ? timeAgo(a.datetime) : ''}</span>
+                      <span style={{color:'var(--accent)',fontWeight:600}}>{newsSym}</span>
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
     function LearnPage() {
       const [active, setActive] = useState(null);
       const [filter, setFilter] = useState("all");
+      const [tab, setTab] = useState("lessons");
 
       const categories = useMemo(() => {
         const cats = [...new Set(ALL_LESSONS.map(l => l.cat))];
@@ -2376,38 +2563,56 @@
         <div className="page-enter">
           <div className="page-header" style={{flexDirection:'column',alignItems:'flex-start'}}>
             <h2>Learn to Trade</h2>
-            <p style={{color:'var(--text-dim)',fontSize:14,marginTop:4}}>{ALL_LESSONS.length} lessons from beginner to advanced</p>
+            <p style={{color:'var(--text-dim)',fontSize:14,marginTop:4}}>{ALL_LESSONS.length} lessons + live stock news</p>
           </div>
 
-          {/* Filter chips */}
-          <div style={{display:'flex',gap:6,marginBottom:24,flexWrap:'wrap'}}>
-            {[["all","All"],["beginner","Beginner"],["intermediate","Intermediate"],["advanced","Advanced"]].map(([key,label]) => (
-              <button key={key} className={`chart-btn ${filter===key?'active':''}`} style={{padding:'6px 16px',fontSize:13}}
-                onClick={()=>setFilter(key)}>{label}{key!=="all" && ` (${ALL_LESSONS.filter(l=>key==="all"||l.level===key).length})`}</button>
-            ))}
-            <span style={{width:1,height:24,background:'var(--border)',margin:'0 4px',alignSelf:'center'}}/>
-            {categories.map(cat => (
-              <button key={cat} className={`chart-btn ${filter===cat?'active':''}`} style={{padding:'6px 14px',fontSize:12}}
-                onClick={()=>setFilter(filter===cat?"all":cat)}>{cat}</button>
+          {/* Tab switcher: Lessons | Stock News */}
+          <div style={{display:'flex',gap:0,marginBottom:20,borderBottom:'2px solid var(--border)'}}>
+            {[["lessons","Lessons"],["news","Stock News"]].map(([key,label]) => (
+              <button key={key} onClick={()=>setTab(key)}
+                style={{padding:'10px 24px',fontSize:14,fontWeight:tab===key?700:500,color:tab===key?'var(--accent)':'var(--text-dim)',
+                  background:'transparent',border:'none',borderBottom:tab===key?'2px solid var(--accent)':'2px solid transparent',
+                  marginBottom:'-2px',cursor:'pointer',transition:'all .2s'}}>
+                {label}
+              </button>
             ))}
           </div>
 
-          <div className="lesson-grid">
-            {filtered.map((l) => {
-              const absIndex = ALL_LESSONS.indexOf(l);
-              return (
-                <div key={absIndex} className="lesson-card" onClick={()=>setActive(absIndex)}>
-                  <span className="lesson-icon">{l.icon}</span>
-                  <h3>{l.title}</h3>
-                  <p>{l.content.substring(0,120)}...</p>
-                  <div style={{display:'flex',gap:6,marginTop:12}}>
-                    <span style={{fontSize:10,color:'var(--text-muted)',background:'var(--surface2)',padding:'3px 8px',borderRadius:20}}>{l.cat}</span>
-                    <span className={`lesson-tag ${l.level}`}>{l.level}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          {tab === "lessons" && (
+            <>
+              {/* Filter chips */}
+              <div style={{display:'flex',gap:6,marginBottom:24,flexWrap:'wrap'}}>
+                {[["all","All"],["beginner","Beginner"],["intermediate","Intermediate"],["advanced","Advanced"]].map(([key,label]) => (
+                  <button key={key} className={`chart-btn ${filter===key?'active':''}`} style={{padding:'6px 16px',fontSize:13}}
+                    onClick={()=>setFilter(key)}>{label}{key!=="all" && ` (${ALL_LESSONS.filter(l=>key==="all"||l.level===key).length})`}</button>
+                ))}
+                <span style={{width:1,height:24,background:'var(--border)',margin:'0 4px',alignSelf:'center'}}/>
+                {categories.map(cat => (
+                  <button key={cat} className={`chart-btn ${filter===cat?'active':''}`} style={{padding:'6px 14px',fontSize:12}}
+                    onClick={()=>setFilter(filter===cat?"all":cat)}>{cat}</button>
+                ))}
+              </div>
+
+              <div className="lesson-grid">
+                {filtered.map((l) => {
+                  const absIndex = ALL_LESSONS.indexOf(l);
+                  return (
+                    <div key={absIndex} className="lesson-card" onClick={()=>setActive(absIndex)}>
+                      <span className="lesson-icon">{l.icon}</span>
+                      <h3>{l.title}</h3>
+                      <p>{l.content.substring(0,120)}...</p>
+                      <div style={{display:'flex',gap:6,marginTop:12}}>
+                        <span style={{fontSize:10,color:'var(--text-muted)',background:'var(--surface2)',padding:'3px 8px',borderRadius:20}}>{l.cat}</span>
+                        <span className={`lesson-tag ${l.level}`}>{l.level}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {tab === "news" && <StockNews />}
         </div>
       );
     }
